@@ -35,14 +35,14 @@ NUMERICS:
 
 # --- USER INPUT ---
 field_to_plot = "T"  
-snap_min = 1700
+snap_min = 0
 snap_max = 3759
 
 # --- TOGGLE ---
-mode = "constant_frame" # Options: "constant_time" or "constant_frame"
+mode = "constant_time" # Options: "constant_time" or "constant_frame"
 
 # --- CONSTANT_TIME SETTINGS ---
-dt_Gyr = 0.001 
+dt_Myr = 1 # Time step in Myr
 
 # --- CONSTANT_FRAME SETTINGS ---
 snap_step = 1   # 1 = every snapshot, 10 = every 10th snapshot, etc.
@@ -73,23 +73,40 @@ FIELD_LABELS = {
 fig_width = 7
 fig_height = 6
 
-# --- DATA PATH ---
-data_path = Path("/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/runs/euler/venus_i_01/archive")
-sdat = StagyyData(data_path)
+# --- 0. STARTUP ---
+print(f"{'='*60}\n       STAGPLOT: MULTI-FIELD VISUALIZATION       \n{'='*60}")
 
-# Extract folder name (e.g., 'venus_02')
+# --- DATA PATH ---
+data_path = Path("/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/runs/festus/venus_imp6/archive")
+
+if not data_path.exists():
+    print(f"[!] CRITICAL ERROR: Data path does not exist:\n    {data_path}")
+    exit(1)
+
+sdat = StagyyData(data_path)
 folder_name = data_path.parent.name 
+
+print(f"[+] Data Path: {data_path}")
+print(f"[+] Run:       {folder_name}")
+print(f"[+] Field:     {field_to_plot}")
+print(f"[+] Mode:      {mode.upper()}")
+if mode == "constant_time":
+    print(f"[+] Interval:  {dt_Myr} Myr")
+else:
+    print(f"[+] Step:      Every {snap_step} snapshot(s)")
 
 # Create Directory: [folder_name]_frames_[field_to_plot]_[mode]
 output_dir = Path(f"{folder_name}_frames_{field_to_plot}_{mode}")
 output_dir.mkdir(parents=True, exist_ok=True)
+print(f"[+] Output:    {output_dir}")
 
-SEC_PER_GYR = 1e9 * 365.25 * 24 * 3600
+SEC_PER_MYR = 1e6 * 365.25 * 24 * 3600
+SEC_PER_GYR = 1e3 * SEC_PER_MYR
 
 # --- 1. PREPARE THE FRAME LIST ---
 frames_to_render = [] 
 
-print(f"Scanning snapshots {snap_min} to {snap_max} in {folder_name}...")
+print(f"\n[INFO] Scanning snapshots {snap_min} to {snap_max}...")
 available_snaps = []
 available_times = []
 
@@ -110,12 +127,13 @@ available_snaps = np.array(available_snaps)
 available_times = np.array(available_times)
 
 if len(available_snaps) == 0:
-    print("Error: No data found in that snapshot range.")
+    print("[!] ERROR: No data found in that snapshot range.")
+    exit(1)
 else:
     if mode == "constant_time":
         t_start = available_times.min()
         t_end = available_times.max()
-        target_times = np.arange(t_start, t_end, dt_Gyr * SEC_PER_GYR)
+        target_times = np.arange(t_start, t_end, dt_Myr * SEC_PER_MYR)
         
         for t_target in target_times:
             idx = np.abs(available_times - t_target).argmin()
@@ -126,9 +144,10 @@ else:
         for i in range(0, len(available_snaps), snap_step):
             frames_to_render.append((int(available_snaps[i]), available_times[i]))
 
-    print(f"Mode: {mode.upper()}. Generating {len(frames_to_render)} frames.")
+    print(f"[INFO] Prepared {len(frames_to_render)} frames for rendering.")
 
     # --- 2. RENDER THE FRAMES ---
+    print(f"\n[INFO] Starting rendering loop...")
     for i, (snap_number, t_val) in enumerate(frames_to_render):
         try:
             snapshot = sdat.snaps[snap_number]
@@ -170,8 +189,10 @@ else:
             plt.close(fig) 
             
             if i % 10 == 0 or i == len(frames_to_render) - 1:
-                print(f"Saved: {file_name}")
+                print(f"   [OK] Saved: {file_name} ({i+1}/{len(frames_to_render)})")
                 
         except Exception as e:
-            print(f"Error at Snap {snap_number}: {e}")
+            print(f"   [!] Error at Snap {snap_number}: {e}")
             plt.close()
+
+    print(f"\n[SUCCESS] Rendering complete. Frames saved to:\n          {output_dir}")
