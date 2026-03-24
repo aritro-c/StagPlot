@@ -31,7 +31,7 @@ A quick utility to inspect StagYY simulation metadata without loading full datas
 Plots a single 2D scalar field (e.g., Temperature, Viscosity, Composition) for a specific point in time.
 - **Modes**: Can target a specific snapshot index or the closest snapshot to a target time (in **Myr**).
 
-### 3. `field_multi.py` (Batch 2D Visualization)
+### 3. `field_batch.py` (Batch 2D Visualization)
 Generates a sequence of frames for 2D fields over a range of snapshots.
 - **Use Case**: Perfect for creating animations or studying temporal evolution of spatial structures.
 - **Modes**: supports `constant_frame` (every N snapshots) or `constant_time` (interpolated to target time intervals in **Myr**).
