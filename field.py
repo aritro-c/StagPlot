@@ -34,11 +34,11 @@ NUMERICS:
 """
 
 # --- USER INPUT ---
-plot_mode = "snapshot"   # Set to "time" or "snapshot" 
-target_time_Gyr = 1.9    # Used if plot_mode is "time"
+plot_mode = "time"   # Set to "time" or "snapshot" 
+target_time_Myr = 20    # Used if plot_mode is "time"
 target_snapshot = 4191  # Used if plot_mode is "snapshot"
 
-field_to_plot = "edot"    
+field_to_plot = "T"    
 
 # --- CONFIGURATION ---
 # Auto-detect log scale for these fields
@@ -58,16 +58,33 @@ FIELD_LABELS = {
     "v1": "Velocity (x)", "edot": "Strain Rate", "c": "Composition"
 }
 
-data_path = Path("/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/runs/euler/venus_i_01/archive/")
+# --- 0. STARTUP ---
+print(f"{'='*60}\n       STAGPLOT: 2D FIELD VISUALIZATION       \n{'='*60}")
+
+# NOTE: Update this path to your StagYY archive directory
+data_path = Path("/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/runs/festus/venus_imp6/archive/")
+
+if not data_path.exists():
+    print(f"[!] CRITICAL ERROR: Data path does not exist:\n    {data_path}")
+    exit(1)
+
 sdat = StagyyData(data_path)
 folder_name = data_path.parent.name 
-SEC_PER_GYR = 1e9 * 365.25 * 24 * 3600
+SEC_PER_MYR = 1e6 * 365.25 * 24 * 3600
+SEC_PER_GYR = 1e3 * SEC_PER_MYR
+
+print(f"[+] Data Path: {data_path}")
+print(f"[+] Run:       {folder_name}")
+print(f"[+] Mode:      {plot_mode.upper()}")
+print(f"[+] Field:     {field_to_plot}")
 
 # --- 1. SELECTION LOGIC ---
+print(f"\n[INFO] Identifying target snapshot...")
 snap_number = None
-actual_time_Gyr = None
+actual_time_Myr = None
 
 if plot_mode == "time":
+    print(f"       Target Time: {target_time_Myr} Myr")
     times, indices = [], []
     for snap in sdat.snaps:
         try:
@@ -75,18 +92,30 @@ if plot_mode == "time":
             times.append(t); indices.append(snap.isnap)
         except: continue
     
+    if not times:
+        print(f"[!] ERROR: No snapshots found with time information.")
+        exit(1)
+
     times, indices = np.array(times), np.array(indices)
-    idx = np.abs(times - (target_time_Gyr * SEC_PER_GYR)).argmin()
-    snap_number, actual_time_Gyr = int(indices[idx]), times[idx] / SEC_PER_GYR
+    idx = np.abs(times - (target_time_Myr * SEC_PER_MYR)).argmin()
+    snap_number, actual_time_Myr = int(indices[idx]), times[idx] / SEC_PER_MYR
+    print(f"       Closest Match: Snap {snap_number} at {actual_time_Myr:.2f} Myr")
 else:
-    snapshot = sdat.snaps[target_snapshot]
-    snap_number = target_snapshot
-    t = snapshot.time if snapshot.time is not None else snapshot.timeinfo["time"]
-    actual_time_Gyr = t / SEC_PER_GYR
+    print(f"       Target Snapshot: {target_snapshot}")
+    try:
+        snapshot = sdat.snaps[target_snapshot]
+        snap_number = target_snapshot
+        t = snapshot.time if snapshot.time is not None else snapshot.timeinfo["time"]
+        actual_time_Myr = t / SEC_PER_MYR
+        print(f"       Snapshot found at {actual_time_Myr:.2f} Myr")
+    except Exception as e:
+        print(f"[!] ERROR: Could not access snapshot {target_snapshot}: {e}")
+        exit(1)
 
 # --- 2. GENERATE THE PLOT ---
 if snap_number is not None:
     try:
+        print(f"\n[INFO] Loading field data and generating plot...")
         snapshot = sdat.snaps[snap_number]
         
         # Unpack limits (defaults to None, None if field not in dict)
@@ -107,7 +136,8 @@ if snap_number is not None:
         label = FIELD_LABELS.get(field_to_plot, field_to_plot)
         cbar.set_label(f"{label} [{unit}]")
         
-        # TIME LABEL ON PLOT (Kept same as before)
+        # TIME LABEL ON PLOT
+        actual_time_Gyr = actual_time_Myr / 1000
         ax.text(0.5, 0.5, f"{actual_time_Gyr:.3f} Gyr", 
                 transform=ax.transAxes, ha="center", va="center", 
                 fontsize=20, color="black", 
@@ -116,12 +146,14 @@ if snap_number is not None:
         fig.set_size_inches(10, 6)
         plt.tight_layout()
         
-        #NAMING SCHEME: [folder]_[field]_snap-[number]_[time]-Gyr.png
-        
-        save_name = f"{folder_name}_{field_to_plot}_snap-{snap_number}_{actual_time_Gyr:.1f}-Gyr.png"
+        # NAMING SCHEME: [folder]_[field]_snap-[number]_[time]-Gyr.png
+        save_name = f"{folder_name}_{field_to_plot}_snap-{snap_number}_{actual_time_Gyr:.3f}-Gyr.png"
+        print(f"[INFO] Saving figure to: {save_name}")
         fig.savefig(save_name, dpi=300)
         plt.close(fig)
-        print(f"Successfully saved: {save_name}")
+        print(f"[SUCCESS] Plot generated successfully.")
 
     except Exception as e:
-        print(f"An error occurred during plotting: {e}")
+        print(f"[!] ERROR: An error occurred during plotting: {e}")
+        import traceback
+        traceback.print_exc()
