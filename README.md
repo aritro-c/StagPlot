@@ -29,16 +29,16 @@ Now you can run the scrips in VSCode using the virtual environment you created.
 A quick utility to inspect StagYY simulation metadata.
 
 ### 2. `field.py`
-Plots a single 2D scalar field for a specific point in time.
+Plots a single 2D scalar field for a specific point in time/snapshot.
 
 ### 3. `field_batch.py`
-Generates a sequence of frames for 2D fields over a range of snapshots/time.
+Generates a sequence of frames for 2D fields over a range of time/snapshots.
 
 ### 4. `rprof.py`
-Plots 1D radial profiles (depth vs. value) for a specific point in time.
+Plots 1D radial profiles (depth vs. value) for a specific point in time/snapshot.
 
 ### 5. `rprof_time.py`
-Creates a spcetime plot of a parameter (Hovmöller diagram).
+Creates a spcetime plot of a radial-profile parameter (Hovmöller diagram).
 
 ### 6. `time.py`
 Plots the evolution of global diagnostic parameters over time.
