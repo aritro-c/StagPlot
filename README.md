@@ -25,22 +25,22 @@ Now you can run the scrips in VSCode using the virtual environment you created.
 
 ## Core Scripts
 
-### 1. `info.py` (Simulation Overview)
-A quick utility to inspect StagYY simulation metadata without loading full datasets.
+### 1. `info.py`
+A quick utility to inspect StagYY simulation metadata.
 
-### 2. `field.py` (2D Field Visualization)
-Plots a single 2D scalar field (e.g., Temperature, Viscosity, Composition) for a specific point in time.
+### 2. `field.py`
+Plots a single 2D scalar field for a specific point in time.
 
-### 3. `field_batch.py` (Batch 2D Visualization)
-Generates a sequence of frames for 2D fields over a range of snapshots.
+### 3. `field_batch.py`
+Generates a sequence of frames for 2D fields over a range of snapshots/time.
 
-### 4. `rprof.py` (Radial Profile Analysis)
-Plots 1D radial profiles (depth vs. value).
+### 4. `rprof.py`
+Plots 1D radial profiles (depth vs. value) for a specific point in time.
 
-### 5. `rprof_time.py` (Temporal Radial Evolution)
-Visualizes how a radial profile evolves over the entire duration of a simulation.
+### 5. `rprof_time.py`
+Creates a spcetime plot of a parameter (Hovmöller diagram).
 
-### 6. `time.py` (Time-Series Analysis)
+### 6. `time.py`
 Plots the evolution of global diagnostic parameters over time.
 
 ## Reference
