@@ -34,11 +34,15 @@ NUMERICS:
 """
 
 # --- USER INPUT ---
-plot_mode = "time"   # Set to "time" or "snapshot" 
-target_time_Myr = 20    # Used if plot_mode is "time"
-target_snapshot = 4191  # Used if plot_mode is "snapshot"
+plot_mode = "snapshot"   # Set to "time" or "snapshot" 
+target_time_Myr = 4500    # Used if plot_mode is "time"
+target_snapshot = 1872  # Used if plot_mode is "snapshot"
 
 field_to_plot = "T"    
+
+# --- EXPORT SETTINGS ---
+EXPORT_SVG = False  # Set to True to also save as .svg
+TRANSPARENT_PNG = True  # Set to True for transparent PNG background
 
 # --- CONFIGURATION ---
 # Auto-detect log scale for these fields
@@ -54,15 +58,53 @@ FIELD_LIMITS = {
 }
 
 FIELD_LABELS = {
-    "T": "Temperature", "eta": "Viscosity", "basalt": "Basalt Fraction",
-    "v1": "Velocity (x)", "edot": "Strain Rate", "c": "Composition"
+    "T": "Temperature",
+    "v1": "Velocity (x)",
+    "v2": "Velocity (y)",
+    "v3": "Velocity (z)",
+    "p": "Pressure",
+    "eta": "Viscosity",
+    "rho": "Density",
+    "rho4rhs": "Density term in RHS",
+    "trarho": "Density from tracer mass",
+    "sII": "Second invariant of stress tensor",
+    "sx1": "Principal stress eigenvector (x)",
+    "sx2": "Principal stress eigenvector (y)",
+    "sx3": "Principal stress eigenvector (z)",
+    "s1val": "Principal stress eigenvalue",
+    "edot": "Strain rate",
+    "Tcond": "Thermal conductivity",
+    "c": "Composition",
+    "cFe": "FeO content",
+    "hpe": "HPE content",
+    "wtr": "Water concentration",
+    "age": "Age",
+    "contID": "ID of continents",
+    "rs1": "Momentum residue (x)",
+    "rs2": "Momentum residue (y)",
+    "rs3": "Momentum residue (z)",
+    "rsc": "Continuity residue",
+    "basalt": "Basalt fraction",
+    "harzburgite": "Harzburgite fraction",
+    "impactor": "Impactor fraction",
+    "prim": "Primordial layer",
+    "meltfrac": "Melt fraction",
+    "meltcompo": "Melt composition",
+    "meltrate": "Melting rate",
+    "meltvel": "Melt velocity",
+    "nmelt": "N melt",
+    "fSiO2": "fSiO2",
+    "fMgO": "fMgO",
+    "fFeO": "fFeO",
+    "fXO": "fXO",
+    "fFeR": "fFeR",
 }
 
 # --- 0. STARTUP ---
 print(f"{'='*60}\n       STAGPLOT: 2D FIELD VISUALIZATION       \n{'='*60}")
 
 # NOTE: Update this path to your StagYY archive directory
-data_path = Path("/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/runs/festus/venus_imp6/archive/")
+data_path = Path("/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/runs/euler/venus_i_01/archive/")
 
 if not data_path.exists():
     print(f"[!] CRITICAL ERROR: Data path does not exist:\n    {data_path}")
@@ -134,7 +176,9 @@ if snap_number is not None:
         # Visual Styling
         unit = snapshot.fields[field_to_plot].meta.dim
         label = FIELD_LABELS.get(field_to_plot, field_to_plot)
-        cbar.set_label(f"{label} [{unit}]")
+        cbar.set_label(f"{label} [{unit}]", size=18)
+        cbar.ax.tick_params(labelsize=14)
+        ax.tick_params(axis='both', which='major', labelsize=14)
         
         # TIME LABEL ON PLOT
         actual_time_Gyr = actual_time_Myr / 1000
@@ -149,7 +193,13 @@ if snap_number is not None:
         # NAMING SCHEME: [folder]_[field]_snap-[number]_[time]-Gyr.png
         save_name = f"{folder_name}_{field_to_plot}_snap-{snap_number}_{actual_time_Gyr:.3f}-Gyr.png"
         print(f"[INFO] Saving figure to: {save_name}")
-        fig.savefig(save_name, dpi=300)
+        fig.savefig(save_name, dpi=300, transparent=TRANSPARENT_PNG)
+        
+        if EXPORT_SVG:
+            svg_save_name = save_name.replace(".png", ".svg")
+            print(f"[INFO] Exporting SVG:    {svg_save_name}")
+            fig.savefig(svg_save_name, transparent=True, dpi=300)
+
         plt.close(fig)
         print(f"[SUCCESS] Plot generated successfully.")
 
