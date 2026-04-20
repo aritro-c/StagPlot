@@ -21,35 +21,40 @@ except ImportError:
 # Define your runs, their system paths, and visual styles here.
 # Note: 'color' can be a name (e.g., 'red'), None, or "none" to use Crameri's colourmaps.
 RUN_CONFIG = {
-    "Venus_Imp5": {
-        "path": "/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/runs/festus/venus_imp5/archive/",
-        "style": "-",      
-        "color": "red"    
-    },
-    "Venus_Imp6": {
-        "path": "/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/runs/festus/venus_imp6/archive/",
+  
+    "Without LA Impacts": {
+        "path": "/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/runs/festus/venus_01/archive/",
         "style": "--",     
-        "color": "green"     
+        "color": "black"     
+    },
+      "With LA Impacts ": {
+        "path": "/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/runs/euler/venus_i_01/archive/",
+        "style": "-",      
+        "color": "orange"    
     },
 }
 
-field_to_plot = "Tmax" 
+field_to_plot = "eta_amean" 
+
+# --- EXPORT SETTINGS ---
+EXPORT_SVG = False  # Set to True to also save as .svg
+TRANSPARENT_PNG = True  # Set to True for transparent PNG background
 
 # --- AXIS LIMITS ---
 # Set X_LIMITS to (min, max) in Gyr, or None for automatic scaling
-X_LIMITS = (0,0.002) 
+X_LIMITS = (0,4.5) 
 
 # MANUAL Y-AXIS LIMITS:
 # Add fields here to force specific Y-axis ranges (min, max).
 FIELD_LIMITS = {
     "Tmean": (500, 4000),
-    "Vrms": (1e-8, 1e-2),
+    #"Vrms": (1e-8, 1e-2),
     "F_mean": (0, 0.5),
     "eta_max": (1e21, 1e27),
 }
 
 # --- VISUAL OPTIONS ---
-USE_CRAMERI = True
+USE_CRAMERI = False
 SEQUENTIAL_MAP = "roma"
 DIVERGING_MAP  = "nuuk"
 
@@ -59,9 +64,9 @@ ALL_TIME_FIELDS = {
     "time": "Time",
     "dt": "Time increment",
     "dTdt": "Time derivative of temperature",
-    "Vmin": "Min velocity",
-    "Vrms": "rms velocity",
-    "Vmax": "Max velocity",
+    "Vmin": "Min Velocity",
+    "Vrms": "RMS Velocity",
+    "Vmax": "Max Velocity",
     "ra_eff": "Effective Ra",
     "mobility": "Plates mobility",
     "ebalance": "Energy balance",
@@ -83,9 +88,9 @@ ALL_TIME_FIELDS = {
     "Nu_bot": "Nusselt at bot",
 
     # Rheology (Viscosity)
-    "eta_min": "Min viscosity",
+    "eta_min": "Min Viscosity",
     "eta_amean": "Viscosity (Arithmetic)",
-    "eta_max": "Max viscosity",
+    "eta_max": "Max Viscosity",
     "eta_gmean": "Geometric mass mean viscosity",
 
     # Melting & Volcanism
@@ -137,9 +142,14 @@ def main():
     print(f"{'='*60}\n TIME-SERIES \n{'='*60}")
     print(f"Target Field: {field_to_plot}")
 
+    if USE_CRAMERI and not HAS_CRAMERI:
+        print("[!] WARNING: 'cmcrameri' package not found. Using Matplotlib defaults.")
+        print("    HINT: To use 'roma', 'nuuk' and other scientific colormaps, install it via:")
+        print("          pip install cmcrameri")
+
     try:
         # Initialize Figure
-        fig, ax = plt.subplots(figsize=(12, 5)) 
+        fig, ax = plt.subplots(figsize=(9, 5)) 
         labels_set = False
         
         # Determine if we should use a diverging color map
@@ -149,10 +159,22 @@ def main():
         num_runs = len(RUN_CONFIG)
         
         # Handle automatic color generation
-        auto_colors = [None] * num_runs
+        import matplotlib
+        cmap_name = DIVERGING_MAP if is_diverging else SEQUENTIAL_MAP
+        cmap_obj = None
+
         if USE_CRAMERI and HAS_CRAMERI:
-            cmap_name = DIVERGING_MAP if is_diverging else SEQUENTIAL_MAP
-            cmap_obj = getattr(cm, cmap_name)
+            try:
+                cmap_obj = getattr(cm, cmap_name)
+            except AttributeError:
+                if cmap_name in matplotlib.colormaps:
+                    cmap_obj = matplotlib.colormaps[cmap_name]
+        
+        if cmap_obj is None and cmap_name in matplotlib.colormaps:
+            cmap_obj = matplotlib.colormaps[cmap_name]
+
+        auto_colors = [None] * num_runs
+        if cmap_obj:
             auto_colors = [cmap_obj(i / (num_runs - 1)) if num_runs > 1 else cmap_obj(0.5) for i in range(num_runs)]
 
         # --- Data Processing Loop ---
@@ -193,8 +215,9 @@ def main():
                     unit = ts_data.meta.dim
                     if "eta" in field_to_plot and unit == "Pa": unit = "Pa s"
                     
-                    ax.set_ylabel(f"{description} [{unit}]" if unit else description, fontsize=12)
-                    ax.set_xlabel("Time [Gyr]", fontsize=12)
+                    ax.set_ylabel(f"{description} [{unit}]" if unit else description, fontsize=14)
+                    ax.set_xlabel("Time [Gyr]", fontsize=16)
+                    ax.tick_params(axis='both', which='major', labelsize=12)
                     
                     # Logarithmic scale detection
                     log_criteria = ["log", "eta", "slog", "visc", "vrms", "vmax", "vmin", "velocity"]
@@ -221,19 +244,27 @@ def main():
             ax.set_ylim(FIELD_LIMITS[field_to_plot])
             print(f"   [i] Manual Y-limits applied: {FIELD_LIMITS[field_to_plot]}")
 
-        ax.legend(loc='best', frameon=True)
+        ax.legend(loc='best', frameon=True, fontsize=14)
         ax.grid(True, which="both", ls="-", alpha=0.15)
-        ax.set_title(f"Evolution of {field_to_plot}", fontsize=14)
+        
+        field_name = ALL_TIME_FIELDS.get(field_to_plot, field_to_plot)
+        ax.set_title(f"{field_name}", fontsize=18)
         
         plt.tight_layout()
 
         save_name = f"timeseries_Gyr_{field_to_plot}.png"
-        fig.savefig(save_name, dpi=300)
+        fig.savefig(save_name, dpi=300, transparent=TRANSPARENT_PNG)
         
         print(f"\n{'='*60}")
         print(f"[SUCCESS] Plot saved as: {save_name}")
-        print(f"{'='*60}")
         
+        if EXPORT_SVG:
+            svg_save_name = save_name.replace(".png", ".svg")
+            fig.savefig(svg_save_name, transparent=True, dpi=300)
+            print(f"[SUCCESS] SVG exported as:  {svg_save_name}")
+
+        print(f"{'='*60}")
+
         plt.show()
 
     except Exception as e:
