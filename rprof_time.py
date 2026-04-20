@@ -18,135 +18,146 @@ except ImportError:
 # --- FULL LIST OF RPROF PARAMETERS ---
 # Use these strings in 'FIELDS_TO_PLOT' to change the data being visualized.
 ALL_RPROF_FIELDS = [
-    "r",            # Radial coordinate
-    "Tmean",        # Temperature
-    "Tmin",         # Min temperature
-    "Tmax",         # Max temperature
-    "vrms",         # rms velocity
-    "vmin",         # Min velocity
-    "vmax",         # Max velocity
-    "vzabs",        # Radial velocity
-    "vzmin",        # Min radial velocity
-    "vzmax",        # Max radial velocity
-    "vhrms",        # Horizontal velocity
-    "vhmin",        # Min horiz velocity
-    "vhmax",        # Max horiz velocity
-    "etalog",       # Viscosity
-    "etamin",       # Min viscosity
-    "etamax",       # Max viscosity
-    "elog",         # Strain rate
-    "emin",         # Min strain rate
-    "emax",         # Max strain rate
-    "slog",         # Stress
-    "smin",         # Min stress
-    "smax",         # Max stress
-    "whrms",        # Horizontal vorticity
-    "whmin",        # Min horiz vorticity
-    "whmax",        # Max horiz vorticity
-    "wzrms",        # Radial vorticity
-    "wzmin",        # Min radial vorticity
-    "wzmax",        # Max radial vorticity
-    "drms",         # Divergence
-    "dmin",         # Min divergence
-    "dmax",         # Max divergence
-    "enadv",        # Advection
-    "endiff",       # Diffusion
-    "enradh",       # Radiogenic heating
-    "enviscdiss",   # Viscous dissipation
-    "enadiabh",     # Adiabatic heating
-    "bsmean",       # Basalt content
-    "bsmin",        # Min basalt content
-    "bsmax",        # Max basalt content
-    "rhomean",      # Density
-    "rhomin",       # Min density
-    "rhomax",       # Max density
-    "airmean",      # Air
-    "airmin",       # Min air
-    "airmax",       # Max air
-    "primmean",     # Primordial
-    "primmin",      # Min primordial
-    "primmax",      # Max primordial
-    "ccmean",       # Continental crust
-    "ccmin",        # Min continental crust
-    "ccmax",        # Max continental crust
-    "fmeltmean",    # Melt fraction
-    "fmeltmin",     # Min melt fraction
-    "fmeltmax",     # Max melt fraction
-    "metalmean",    # Metal
-    "metalmin",     # Min metal
-    "metalmax",     # Max metal
-    "gsmean",       # Grain size
-    "gsmin",        # Min grain size
-    "gsmax",        # Max grain
-    "viscdisslog",  # Viscous dissipation
-    "viscdissmin",  # Min visc dissipation
-    "viscdissmax",  # Max visc dissipation
-    "advtot",       # Advection
-    "advdesc",      # Downward advection
-    "advasc",       # Upward advection
-    "tcondmean",    # Conductivity
-    "tcondmin",     # Min conductivity
-    "tcondmax",     # Max conductivity
-    "impmean",      # Impactor fraction
-    "impmin",       # Min impactor fraction
-    "impmax",       # Max impactor fraction
-    "hzmean",       # Harzburgite fraction
-    "hzmin",        # Min harzburgite fraction
-    "hzmax",        # Max harzburgite fraction
-    "TTGmean",      # TTG fraction
-    "TTGmin",       # Min TTG fraction
-    "TTGmax",       # Max TTG fraction
-    "edismean",     # Dislocation creep fraction
-    "edismin",      # Min dislocation creep fraction
-    "edismax",      # Max dislocation creep fraction
-    "egbsmean",     # Grain boundary sliding fraction
-    "egbsmin",      # Min grain boundary sliding fraction
-    "egbsmax",      # Max grain boundary sliding fraction
-    "ePeimean",     # Peierls creep fraction
-    "ePeimin",      # Min Peierls creep fraction
-    "ePeimax",      # Max Peierls creep fraction
-    "eplamean",     # Plasticity fraction
-    "eplamin",      # Min plasticity fraction
-    "eplamax",      # Max plasticity fraction
-    "dr",           # Cell thicknesses
-    "diff",         # Diffusion flux
-    "diffs",        # Scaled diffusion flux
-    "advts",        # Scaled advection flux
-    "advds",        # Scaled downward advection flux
-    "advas",        # Scaled upward advection flux
-    "energy"        # Total heat flux
+    "r",            # Radial coordinate [m]
+    "Tmean",        # Temperature [K]
+    "Tmin",         # Min temperature [K]
+    "Tmax",         # Max temperature [K]
+    "vrms",         # rms velocity [m/s]
+    "vmin",         # Min velocity [m/s]
+    "vmax",         # Max velocity [m/s]
+    "vzabs",        # Radial velocity [m/s]
+    "vzmin",        # Min radial velocity [m/s]
+    "vzmax",        # Max radial velocity [m/s]
+    "vhrms",        # Horizontal velocity [m/s]
+    "vhmin",        # Min horiz velocity [m/s]
+    "vhmax",        # Max horiz velocity [m/s]
+    "etalog",       # Viscosity [Pa.s]
+    "etamin",       # Min viscosity [Pa.s]
+    "etamax",       # Max viscosity [Pa.s]
+    "elog",         # Strain rate [1/s]
+    "emin",         # Min strain rate [1/s]
+    "emax",         # Max strain rate [1/s]
+    "slog",         # Stress [Pa]
+    "smin",         # Min stress [Pa]
+    "smax",         # Max stress [Pa]
+    "whrms",        # Horizontal vorticity [1/s]
+    "whmin",        # Min horiz vorticity [1/s]
+    "whmax",        # Max horiz vorticity [1/s]
+    "wzrms",        # Radial vorticity [1/s]
+    "wzmin",        # Min radial vorticity [1/s]
+    "wzmax",        # Max radial vorticity [1/s]
+    "drms",         # Divergence [1/s]
+    "dmin",         # Min divergence [1/s]
+    "dmax",         # Max divergence [1/s]
+    "enadv",        # Advection [W/m2]
+    "endiff",       # Diffusion [W/m2]
+    "enradh",       # Radiogenic heating [W/m2]
+    "enviscdiss",   # Viscous dissipation [W/m2]
+    "enadiabh",     # Adiabatic heating [W/m2]
+    "bsmean",       # Basalt content [1]
+    "bsmin",        # Min basalt content [1]
+    "bsmax",        # Max basalt content [1]
+    "rhomean",      # Density [kg/m3]
+    "rhomin",       # Min density [kg/m3]
+    "rhomax",       # Max density [kg/m3]
+    "airmean",      # Air [1]
+    "airmin",       # Min air [1]
+    "airmax",       # Max air [1]
+    "primmean",     # Primordial [1]
+    "primmin",      # Min primordial [1]
+    "primmax",      # Max primordial [1]
+    "ccmean",       # Continental crust [1]
+    "ccmin",        # Min continental crust [1]
+    "ccmax",        # Max continental crust [1]
+    "fmeltmean",    # Melt fraction [1]
+    "fmeltmin",     # Min melt fraction [1]
+    "fmeltmax",     # Max melt fraction [1]
+    "metalmean",    # Metal [1]
+    "metalmin",     # Min metal [1]
+    "metalmax",     # Max metal [1]
+    "gsmean",       # Grain size [m]
+    "gsmin",        # Min grain size [m]
+    "gsmax",        # Max grain [m]
+    "viscdisslog",  # Viscous dissipation [W/m2]
+    "viscdissmin",  # Min visc dissipation [W/m2]
+    "viscdissmax",  # Max visc dissipation [W/m2]
+    "advtot",       # Advection [W/m2]
+    "advdesc",      # Downward advection [W/m2]
+    "advasc",       # Upward advection [W/m2]
+    "tcondmean",    # Conductivity [W/(m.K)]
+    "tcondmin",     # Min conductivity [W/(m.K)]
+    "tcondmax",     # Max conductivity [W/(m.K)]
+    "impmean",      # Impactor fraction [1]
+    "impmin",       # Min impactor fraction [1]
+    "impmax",       # Max impactor fraction [1]
+    "hzmean",       # Harzburgite fraction [1]
+    "hzmin",        # Min harzburgite fraction [1]
+    "hzmax",        # Max harzburgite fraction [1]
+    "TTGmean",      # TTG fraction [1]
+    "TTGmin",       # Min TTG fraction [1]
+    "TTGmax",       # Max TTG fraction [1]
+    "edismean",     # Dislocation creep fraction [1]
+    "edismin",      # Min dislocation creep fraction [1]
+    "edismax",      # Max dislocation creep fraction [1]
+    "egbsmean",     # Grain boundary sliding fraction [1]
+    "egbsmin",      # Min grain boundary sliding fraction [1]
+    "egbsmax",      # Max grain boundary sliding fraction [1]
+    "ePeimean",     # Peierls creep fraction [1]
+    "ePeimin",      # Min Peierls creep fraction [1]
+    "ePeimax",      # Max Peierls creep fraction [1]
+    "eplamean",     # Plasticity fraction [1]
+    "eplamin",      # Min plasticity fraction [1]
+    "eplamax",      # Max plasticity fraction [1]
+    "dr",           # Cell thicknesses [m]
+    "diff",         # Diffusion flux [W/m2]
+    "diffs",        # Scaled diffusion flux [W/m2]
+    "advts",        # Scaled advection flux [W/m2]
+    "advds",        # Scaled downward advection flux [W/m2]
+    "advas",        # Scaled upward advection flux [W/m2]
+    "energy",       # Total heat flux [W/m2]
 ]
 
 
 
 # --- USER CONFIGURATION ---
 # Define the path to your StagYY 'archive' directory.
-DATA_ROOT = Path("/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/runs/festus/venus_imp6/archive/")
+DATA_ROOT = Path("/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/runs/euler/venus_i_01/archive/")
 
-# Fields to visualize (Y-axis = Depth, X-axis = Time, Color = Field Value)
-FIELDS_TO_PLOT = ["bsmean", "fmeltmax", "elog"]   
+# Fields to visualize ["Tmean", "fmeltmax", "elog"], (Y-axis = Depth, X-axis = Time, Color = Field Value)
+FIELDS_TO_PLOT = ["vrms"]   
+
+# --- EXPORT SETTINGS ---
+EXPORT_SVG = False  # Set to True to also save as .svg
+TRANSPARENT_PNG = True  # Set to True for transparent PNG background
 
 # Manual limits for specific fields to ensure consistency across different runs.
 FIELD_LIMITS = {
-    "Tmax": (0, 5500),
+    "Tmax": (500, 4000),
+    "Tmean": (500, 4000),
     "vmax": (1e-6, 1.2e-3),
-    "vrms": (1e-8, 1e-2), 
+   # "vrms": (1e-8, 1e-2), 
     "fmeltmax": (0, 1.0),
-    "etalog": (1e18, 1e24),
+    "bsmean": (0, 1.0),
+   # "etalog": (1e18, 1e24),
 }
 
 # Downsampling: 1 = every step, 10 = every 10th step.
-SAMPLE_STEP = 1  
+SAMPLE_STEP = 10
 
 # Colormap Preferences
 USE_CRAMERI = True
-SEQUENTIAL_MAP = "batlow"   # Good for T, viscosity, composition
-DIVERGING_MAP  = "roma"  # Good for velocity, divergence, flux
+SEQUENTIAL_MAP = "lajolla"   # Good for T, viscosity, composition
+DIVERGING_MAP  = "lajolla"  # Good for velocity, divergence, flux
 
 def run_visualizer():
     # --- 1. INITIALIZATION ---
     print(f"{'='*60}\n RPROF-TIME \n{'='*60}")
     
+    if USE_CRAMERI and not HAS_CRAMERI:
+        print("[!] WARNING: 'cmcrameri' package not found. Using Matplotlib defaults.")
+        print("    HINT: To use 'vik' and other scientific colormaps, install it via:")
+        print("          pip install cmcrameri")
+
     if not DATA_ROOT.exists():
         print(f"CRITICAL ERROR: The path '{DATA_ROOT}' does not exist.")
         print("Please check your 'DATA_ROOT' configuration at the top of the script.")
@@ -237,11 +248,26 @@ def run_visualizer():
 
         diverging_keywords = ["vz", "vh", "drms", "adv"]
         is_diverging = any(k in field.lower() for k in diverging_keywords)
+        cmap_name = DIVERGING_MAP if is_diverging else SEQUENTIAL_MAP
 
+        import matplotlib
         if USE_CRAMERI and HAS_CRAMERI:
-            cmap = getattr(cm, DIVERGING_MAP) if is_diverging else getattr(cm, SEQUENTIAL_MAP)
+            try:
+                cmap = getattr(cm, cmap_name)
+            except AttributeError:
+                # Fallback to standard matplotlib if the crameri map is not found
+                if cmap_name in matplotlib.colormaps:
+                    cmap = cmap_name
+                else:
+                    cmap = 'RdBu_r' if is_diverging else 'magma'
         else:
-            cmap = 'RdBu_r' if is_diverging else 'magma'
+            # Not using Crameri or it's not available: check if the requested map is standard
+            if cmap_name in matplotlib.colormaps:
+                cmap = cmap_name
+            else:
+                # Use hardcoded fallbacks if the user chose a name not in matplotlib
+                # (e.g. they set it to a crameri name but don't have it installed)
+                cmap = 'RdBu_r' if is_diverging else 'magma'
 
         im = ax.pcolormesh(np.array(times), depths, data_matrix, 
                            shading='auto', cmap=cmap, norm=norm)
@@ -262,8 +288,13 @@ def run_visualizer():
     plt.tight_layout(rect=[0, 0, 0.95, 1])
 
     save_name = f"evol_{'_'.join(FIELDS_TO_PLOT)}.png"
-    fig.savefig(save_name, dpi=300, bbox_inches='tight')
+    fig.savefig(save_name, dpi=300, bbox_inches='tight', transparent=TRANSPARENT_PNG)
     print(f"[*] SUCCESS: Plot saved as '{save_name}'")
+
+    if EXPORT_SVG:
+        svg_save_name = save_name.replace(".png", ".svg")
+        fig.savefig(svg_save_name, bbox_inches='tight', transparent=True, dpi=300)
+        print(f"[*] SUCCESS: SVG exported as '{svg_save_name}'")
     
     plt.show()
 
