@@ -35,11 +35,15 @@ NUMERICS:
 
 # --- USER INPUT ---
 field_to_plot = "T"  
-snap_min = 0
-snap_max = 3759
+snap_min = 1500
+snap_max = 6000
+
+# --- EXPORT SETTINGS ---
+EXPORT_SVG = False  # Set to True to also save as .svg
+TRANSPARENT_PNG = True  # Set to True for transparent PNG background
 
 # --- TOGGLE ---
-mode = "constant_time" # Options: "constant_time" or "constant_frame"
+mode = "constant_frame" # Options: "constant_time" or "constant_frame"
 
 # --- CONSTANT_TIME SETTINGS ---
 dt_Myr = 1 # Time step in Myr
@@ -61,12 +65,46 @@ FIELD_LIMITS = {
 }
 
 FIELD_LABELS = {
-    "T": "Temperature", 
-    "eta": "Viscosity", 
-    "basalt": "Basalt Fraction",
-    "v1": "Velocity (x)", 
-    "edot": "Strain Rate", 
-    "c": "Composition"
+    "T": "Temperature",
+    "v1": "Velocity (x)",
+    "v2": "Velocity (y)",
+    "v3": "Velocity (z)",
+    "p": "Pressure",
+    "eta": "Viscosity",
+    "rho": "Density",
+    "rho4rhs": "Density term in RHS",
+    "trarho": "Density from tracer mass",
+    "sII": "Second invariant of stress tensor",
+    "sx1": "Principal stress eigenvector (x)",
+    "sx2": "Principal stress eigenvector (y)",
+    "sx3": "Principal stress eigenvector (z)",
+    "s1val": "Principal stress eigenvalue",
+    "edot": "Strain rate",
+    "Tcond": "Thermal conductivity",
+    "c": "Composition",
+    "cFe": "FeO content",
+    "hpe": "HPE content",
+    "wtr": "Water concentration",
+    "age": "Age",
+    "contID": "ID of continents",
+    "rs1": "Momentum residue (x)",
+    "rs2": "Momentum residue (y)",
+    "rs3": "Momentum residue (z)",
+    "rsc": "Continuity residue",
+    "basalt": "Basalt fraction",
+    "harzburgite": "Harzburgite fraction",
+    "impactor": "Impactor fraction",
+    "prim": "Primordial layer",
+    "meltfrac": "Melt fraction",
+    "meltcompo": "Melt composition",
+    "meltrate": "Melting rate",
+    "meltvel": "Melt velocity",
+    "nmelt": "N melt",
+    "fSiO2": "fSiO2",
+    "fMgO": "fMgO",
+    "fFeO": "fFeO",
+    "fXO": "fXO",
+    "fFeR": "fFeR",
 }
 
 # --- PLOT SETTINGS ---
@@ -77,7 +115,7 @@ fig_height = 6
 print(f"{'='*60}\n       STAGPLOT: MULTI-FIELD VISUALIZATION       \n{'='*60}")
 
 # --- DATA PATH ---
-data_path = Path("/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/runs/festus/venus_imp6/archive")
+data_path = Path("/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/runs/euler/venus_i_01/archive")
 
 if not data_path.exists():
     print(f"[!] CRITICAL ERROR: Data path does not exist:\n    {data_path}")
@@ -169,7 +207,9 @@ else:
             # Colorbar labels
             unit = snapshot.fields[field_to_plot].meta.dim
             display_name = FIELD_LABELS.get(field_to_plot, field_to_plot)
-            cbar.set_label(f"{display_name} [{unit}]")
+            cbar.set_label(f"{display_name} [{unit}]", size=18)
+            cbar.ax.tick_params(labelsize=14)
+            ax.tick_params(axis='both', which='major', labelsize=14)
             
             # Time Label on Plot
             time_Gyr = t_val / SEC_PER_GYR
@@ -185,7 +225,12 @@ else:
             
             # FILE NAMING SCHEME
             file_name = f"frame_{snap_number:05d}.png"
-            fig.savefig(output_dir / file_name, dpi=300)
+            fig.savefig(output_dir / file_name, dpi=300, transparent=TRANSPARENT_PNG)
+
+            if EXPORT_SVG:
+                svg_file_name = file_name.replace(".png", ".svg")
+                fig.savefig(output_dir / svg_file_name, transparent=True, dpi=300)
+
             plt.close(fig) 
             
             if i % 10 == 0 or i == len(frames_to_render) - 1:
