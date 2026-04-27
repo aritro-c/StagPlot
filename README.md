@@ -18,7 +18,7 @@ source myenv/bin/activate
 pip install stagpy
 ```
 
-If using VSCode, ensure your Python Interpreter is set to the `myenv` you created.
+If you are using VSCode, ensure your Python Interpreter is set to the `myenv` you created.
 Press ctrl+shift+p (or type ">" in the search box) and select the Python Interpreter as "myenv".
 
 Now you can run the scrips in VSCode using the virtual environment you created.
