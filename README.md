@@ -40,7 +40,10 @@ Plots 1D radial profiles (depth vs. value) for a specific point in time/snapshot
 ### 5. `rprof_time.py`
 Creates a spcetime plot of a radial-profile parameter (Hovmöller diagram).
 
-### 6. `time.py`
+### 6. `surf2D_time.py`
+Creates spcetime plot of surface parameters (Hovmöller diagram).
+
+### 7. `time.py`
 Plots the evolution of global diagnostic parameters over time.
 
 ## Reference
