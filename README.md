@@ -1,7 +1,7 @@
 # StagPlot 
 ### (UNDER CONSTRUCTION!)
 
-A suite of Python scripts for post-processing and visualizing output from **StagYY**, a numerical mantle convection code. These scripts use the **StagPy** library as a backend to interface with simulation data.
+A suite of Python scripts for post-processing and visualizing output from **StagYY**, a numerical mantle convection code. Most of the scripts use the **StagPy** library as a backend to interface with simulation data.
 
 ## Prerequisites
 
