@@ -8,7 +8,7 @@ from stagpy.stagyydata import StagyyData
 from stagpy import field as sp_field
 
 """
---- REFERENCE: STAGYY FIELD EXPLANATIONS ---
+--- REFERENCE: STAGYY FIELDS ---
 PHYSICAL/THERMODYNAMIC:
     T: Temperature                  p: Pressure
     rho: Density                    eta: Viscosity (Log)
