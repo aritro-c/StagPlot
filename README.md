@@ -35,7 +35,7 @@ A quick utility to inspect StagYY simulation metadata.
 Plots a single 2D scalar field for a specific point in time/snapshot.
 
 ### 3. `field_batch.py`
-Generates a sequence of frames for 2D fields over a range of time/snapshots.
+Generates a sequence of frames for 2D fields over a range of time/snapshots. You can use FFmpeg to stitch those plots and make a movie.
 
 ### 4. `rprof.py`
 Plots 1D radial profiles (depth vs. value) for a specific point in time/snapshot.
