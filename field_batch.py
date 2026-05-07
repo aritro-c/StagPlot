@@ -1,6 +1,7 @@
 import matplotlib
 matplotlib.use('Agg')
 from pathlib import Path
+import subprocess
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import numpy as np
@@ -38,15 +39,17 @@ NUMERICS:
 field_to_plot = "T"  
 
 # Range Selection
-range_mode = "time"  # Options: "snapshot" or "time"
-snap_min = 1500         # Used if range_mode is "snapshot"
-snap_max = 2000         # Used if range_mode is "snapshot"
+range_mode = "snapshot"  # Options: "snapshot" or "time"
+snap_min = 0         # Used if range_mode is "snapshot"
+snap_max = 50         # Used if range_mode is "snapshot"
 time_min_Myr = 0        # Used if range_mode is "time"
 time_max_Myr = 1     # Used if range_mode is "time"
 
 # --- EXPORT SETTINGS ---
 EXPORT_SVG = False  # Set to True to also save as .svg
-TRANSPARENT_PNG = True  # Set to True for transparent PNG background
+TRANSPARENT_PNG = False  # Set to True for transparent PNG background
+MAKE_MOVIE = True   # Set to True to generate an MP4 movie using FFmpeg
+MOVIE_FPS = 2      # Frames per second for the movie
 
 # --- TOGGLE ---
 mode = "constant_frame" # Options: "constant_time" or "constant_frame"
@@ -238,3 +241,38 @@ for i, (snap_number, t_val) in enumerate(frames_to_render):
         plt.close()
 
 print(f"\n[SUCCESS] Rendering complete. Frames saved to:\n          {output_dir}")
+
+# --- 3. MAKE MOVIE ---
+if MAKE_MOVIE:
+    movie_name = f"{folder_name}_{field_to_plot}_{mode}.mp4"
+    print(f"\n[INFO] Creating movie: {movie_name}")
+    
+    # FFmpeg command:
+    # -y: overwrite output
+    # -framerate: input FPS
+    # -i: input pattern (using frames from output_dir)
+    # -c:v libx264: H.264 codec
+    # -pix_fmt yuv420p: compatibility for most players
+    # -vf "pad=ceil(iw/2)*2:ceil(ih/2)*2": ensure dimensions are even (required for x264)
+    
+    cmd = [
+        "ffmpeg", "-y",
+        "-framerate", str(MOVIE_FPS),
+        "-i", str(output_dir / "frame_%05d.png"),
+        "-c:v", "libx264",
+        "-pix_fmt", "yuv420p",
+        "-vf", "pad=ceil(iw/2)*2:ceil(ih/2)*2",
+        movie_name
+    ]
+    
+    try:
+        print(f"       Running FFmpeg...")
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        if result.returncode == 0:
+            print(f"[SUCCESS] Movie created: {movie_name}")
+        else:
+            print(f"[!] ERROR: FFmpeg failed:\n{result.stderr}")
+    except FileNotFoundError:
+        print("[!] ERROR: 'ffmpeg' command not found. Please install FFmpeg to use MAKE_MOVIE.")
+    except Exception as e:
+        print(f"[!] ERROR: An unexpected error occurred during movie creation: {e}")
