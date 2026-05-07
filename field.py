@@ -6,6 +6,7 @@ import matplotlib.colors as colors
 import numpy as np
 from stagpy.stagyydata import StagyyData
 from stagpy import field as sp_field
+from stagpy import phyvars
 
 """
 --- REFERENCE: STAGYY FIELDS ---
@@ -34,11 +35,11 @@ NUMERICS:
 """
 
 # --- USER INPUT ---
-plot_mode = "snapshot"   # Set to "time" or "snapshot" 
+plot_mode = "time"   # Set to "time" or "snapshot" 
 target_time_Myr = 4500    # Used if plot_mode is "time"
-target_snapshot = 1872  # Used if plot_mode is "snapshot"
+target_snapshot = 500  # Used if plot_mode is "snapshot"
 
-field_to_plot = "T"    
+field_to_plot = "eta"    
 
 # --- EXPORT SETTINGS ---
 EXPORT_SVG = False  # Set to True to also save as .svg
@@ -57,49 +58,6 @@ FIELD_LIMITS = {
     "meltfrac": (0.0, 0.2),
 }
 
-FIELD_LABELS = {
-    "T": "Temperature",
-    "v1": "Velocity (x)",
-    "v2": "Velocity (y)",
-    "v3": "Velocity (z)",
-    "p": "Pressure",
-    "eta": "Viscosity",
-    "rho": "Density",
-    "rho4rhs": "Density term in RHS",
-    "trarho": "Density from tracer mass",
-    "sII": "Second invariant of stress tensor",
-    "sx1": "Principal stress eigenvector (x)",
-    "sx2": "Principal stress eigenvector (y)",
-    "sx3": "Principal stress eigenvector (z)",
-    "s1val": "Principal stress eigenvalue",
-    "edot": "Strain rate",
-    "Tcond": "Thermal conductivity",
-    "c": "Composition",
-    "cFe": "FeO content",
-    "hpe": "HPE content",
-    "wtr": "Water concentration",
-    "age": "Age",
-    "contID": "ID of continents",
-    "rs1": "Momentum residue (x)",
-    "rs2": "Momentum residue (y)",
-    "rs3": "Momentum residue (z)",
-    "rsc": "Continuity residue",
-    "basalt": "Basalt fraction",
-    "harzburgite": "Harzburgite fraction",
-    "impactor": "Impactor fraction",
-    "prim": "Primordial layer",
-    "meltfrac": "Melt fraction",
-    "meltcompo": "Melt composition",
-    "meltrate": "Melting rate",
-    "meltvel": "Melt velocity",
-    "nmelt": "N melt",
-    "fSiO2": "fSiO2",
-    "fMgO": "fMgO",
-    "fFeO": "fFeO",
-    "fXO": "fXO",
-    "fFeR": "fFeR",
-}
-
 # --- 0. STARTUP ---
 print(f"{'='*60}\n       STAGPLOT: 2D FIELD VISUALIZATION       \n{'='*60}")
 
@@ -115,10 +73,15 @@ folder_name = data_path.parent.name
 SEC_PER_MYR = 1e6 * 365.25 * 24 * 3600
 SEC_PER_GYR = 1e3 * SEC_PER_MYR
 
+try:
+    field_name_display = phyvars.FIELD[field_to_plot].description
+except KeyError:
+    field_name_display = field_to_plot
+
 print(f"[+] Data Path: {data_path}")
 print(f"[+] Run:       {folder_name}")
 print(f"[+] Mode:      {plot_mode.upper()}")
-print(f"[+] Field:     {field_to_plot}")
+print(f"[+] Field:     {field_name_display}")
 
 # --- 1. SELECTION LOGIC ---
 print(f"\n[INFO] Identifying target snapshot...")
@@ -127,28 +90,31 @@ actual_time_Myr = None
 
 if plot_mode == "time":
     print(f"       Target Time: {target_time_Myr} Myr")
-    times, indices = [], []
-    for snap in sdat.snaps:
+    target_time = target_time_Myr * SEC_PER_MYR
+    try:
+        snap_before = sdat.snaps.at_time(target_time)
+        # Check if snap_after is closer
         try:
-            t = snap.time if snap.time is not None else snap.timeinfo["time"]
-            times.append(t); indices.append(snap.isnap)
-        except: continue
-    
-    if not times:
-        print(f"[!] ERROR: No snapshots found with time information.")
+            snap_after = sdat.snaps[snap_before.isnap + 1]
+            if abs(snap_after.time - target_time) < abs(snap_before.time - target_time):
+                snapshot = snap_after
+            else:
+                snapshot = snap_before
+        except:
+            snapshot = snap_before
+            
+        snap_number = snapshot.isnap
+        actual_time_Myr = snapshot.time / SEC_PER_MYR
+        print(f"       Closest Match: Snap {snap_number} at {actual_time_Myr:.2f} Myr")
+    except Exception as e:
+        print(f"[!] ERROR: Failed to find snapshot at time {target_time_Myr} Myr: {e}")
         exit(1)
-
-    times, indices = np.array(times), np.array(indices)
-    idx = np.abs(times - (target_time_Myr * SEC_PER_MYR)).argmin()
-    snap_number, actual_time_Myr = int(indices[idx]), times[idx] / SEC_PER_MYR
-    print(f"       Closest Match: Snap {snap_number} at {actual_time_Myr:.2f} Myr")
 else:
     print(f"       Target Snapshot: {target_snapshot}")
     try:
         snapshot = sdat.snaps[target_snapshot]
         snap_number = target_snapshot
-        t = snapshot.time if snapshot.time is not None else snapshot.timeinfo["time"]
-        actual_time_Myr = t / SEC_PER_MYR
+        actual_time_Myr = snapshot.time / SEC_PER_MYR
         print(f"       Snapshot found at {actual_time_Myr:.2f} Myr")
     except Exception as e:
         print(f"[!] ERROR: Could not access snapshot {target_snapshot}: {e}")
@@ -175,7 +141,10 @@ if snap_number is not None:
         
         # Visual Styling
         unit = snapshot.fields[field_to_plot].meta.dim
-        label = FIELD_LABELS.get(field_to_plot, field_to_plot)
+        try:
+            label = phyvars.FIELD[field_to_plot].description
+        except KeyError:
+            label = field_to_plot
         cbar.set_label(f"{label} [{unit}]", size=18)
         cbar.ax.tick_params(labelsize=14)
         ax.tick_params(axis='both', which='major', labelsize=14)
