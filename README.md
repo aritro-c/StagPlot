@@ -16,6 +16,9 @@ source myenv/bin/activate
 
 # Install StagPy
 pip install stagpy
+
+# Install Scientific Colourmap by Fabio Crameri (Optional)
+pip install cmcrameri
 ```
 
 If you are using VSCode, ensure your Python Interpreter is set to the `myenv` you created.
