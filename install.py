@@ -26,7 +26,7 @@ def main():
     print("========================================")
     
     # 1. Create virtual environment
-    venv_name = "myenv"
+    venv_name = "StagPlot"
     print(f"\n[*] Creating virtual environment: {venv_name}...")
     run_command([sys.executable, "-m", "venv", venv_name])
     
@@ -72,8 +72,10 @@ def main():
     print("      INSTALLATION SUCCESSFUL!          ")
     print("="*40)
     print(f"\nDetected System: {system_label}")
-    print(f"Open VScode in the current directory and ensure your Python Interpreter is set to {venv_name} (VSCode should automatically detect that.")
+    print(f"Open VScode in the current directory and ensure your Python Interpreter is set to '{venv_name}' (VSCode should automatically detect that).")
+    print(f"  ")
     print(f"Now you can start using StagPlot")
+    print(f"  ")
     print(f"You can also use StagPlot directly from command line. Just activate your environment first:")
     print(f"\n    {activate_cmd}")
  
