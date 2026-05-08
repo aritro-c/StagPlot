@@ -44,7 +44,7 @@ Press ctrl+shift+p (or type ">" in the search box) and select the Python Interpr
 
 Now you can run the scrips in VSCode using the virtual environment you created.
 
-### FFmpeg Installation (Optional, used if you want to create movies directly using field_batch.py scrip)
+### FFmpeg Installation (Optional, used if you want to create movies directly using the field_batch.py script)
 
 FFmpeg is required by `field_batch.py` to create animations.
 
