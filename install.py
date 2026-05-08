@@ -15,28 +15,37 @@ def run_command(command):
         sys.exit(1)
 
 def main():
+    # 0. Check Python version (f-strings require 3.6+)
+    if sys.version_info < (3, 6):
+        print("[ERROR] StagPlot requires Python 3.6 or newer.")
+        print(f"Current version: {sys.version}")
+        sys.exit(1)
+
     print("========================================")
     print("     StagPlot Installation Script       ")
     print("========================================")
     
     # 1. Create virtual environment
-    venv_name = "myenv_StagPlot"
+    venv_name = "myenv"
     print(f"\n[*] Creating virtual environment: {venv_name}...")
     run_command([sys.executable, "-m", "venv", venv_name])
     
-    # 2. Determine paths for pip and python based on OS
-    if platform.system() == "Windows":
+    # 2. Determine paths and OS label
+    os_name = platform.system()
+    if os_name == "Windows":
         pip_path = os.path.join(venv_name, "Scripts", "pip.exe")
         python_path = os.path.join(venv_name, "Scripts", "python.exe")
         activate_cmd = f".\\{venv_name}\\Scripts\\activate"
+        system_label = "Windows"
     else:
         pip_path = os.path.join(venv_name, "bin", "pip")
         python_path = os.path.join(venv_name, "bin", "python")
         activate_cmd = f"source {venv_name}/bin/activate"
+        system_label = "Linux/macOS"
         
     # 3. Install/Upgrade pip
     print("[*] Upgrading pip...")
-    run_command([pip_path, "install", "--upgrade", "pip"])
+    run_command([python_path, "-m", "pip", "install", "--upgrade", "pip"])
     
     # 4. Install dependencies
     dependencies = ["stagpy", "cmcrameri", "numpy", "matplotlib"]
@@ -51,21 +60,20 @@ def main():
     except (subprocess.CalledProcessError, FileNotFoundError):
         print("[-] FFmpeg NOT found. It is required for 'field_batch.py' animations.")
         print("    Please install it using the following command:")
-        if platform.system() == "Linux":
+        if os_name == "Linux":
             print("    sudo apt update && sudo apt install ffmpeg")
-        elif platform.system() == "Darwin": # macOS
+        elif os_name == "Darwin": # macOS
             print("    brew install ffmpeg")
-        elif platform.system() == "Windows":
+        elif os_name == "Windows":
             print("    winget install ffmpeg")
 
     # 6. Final Instructions
     print("\n" + "="*40)
     print("      INSTALLATION SUCCESSFUL!          ")
     print("="*40)
-    print(f"\nTo start using StagPlot, activate your environment:")
+    print(f"\nDetected System: {system_label}")
+    print(f"To start using StagPlot, activate your environment:")
     print(f"\n    {activate_cmd}")
-    print("\nThen you can run scripts, for example:")
-    print(f"    python info.py")
     print("="*40)
 
 if __name__ == "__main__":
