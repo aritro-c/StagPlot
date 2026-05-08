@@ -7,12 +7,30 @@ A suite of Python scripts for post-processing and visualizing output from **Stag
 
 It is recommended to use a virtual environment to manage dependencies:
 
+### Linux and macOS
+
 ```bash
 # Create a virtual environment
 python3 -m venv myenv
 
 # Activate it
 source myenv/bin/activate
+
+# Install StagPy
+pip install stagpy
+
+# Install Scientific Colourmap by Fabio Crameri (Optional)
+pip install cmcrameri
+```
+
+### Windows
+
+```powershell
+# Create a virtual environment
+python -m venv myenv
+
+# Activate it
+.\myenv\Scripts\activate
 
 # Install StagPy
 pip install stagpy
