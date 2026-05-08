@@ -20,7 +20,7 @@ def main():
     print("========================================")
     
     # 1. Create virtual environment
-    venv_name = "myenv"
+    venv_name = "myenv_StagPlot"
     print(f"\n[*] Creating virtual environment: {venv_name}...")
     run_command([sys.executable, "-m", "venv", venv_name])
     
