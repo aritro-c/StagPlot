@@ -7,9 +7,15 @@ A suite of Python scripts for post-processing and visualizing output from **Stag
 
 ### Automated Installation (Recommended)
 
-You can use the provided `install.py` script to automatically create a virtual environment and install all dependencies. This works on Linux, macOS, and Windows.
+You can use the provided `install.py` script to automatically create a virtual environment and install all dependencies.
 
+**Linux and macOS:**
 ```bash
+python3 install.py
+```
+
+**Windows:**
+```powershell
 python install.py
 ```
 
