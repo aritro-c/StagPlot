@@ -5,7 +5,7 @@ A suite of Python scripts for post-processing and visualizing output from **Stag
 
 ## Prerequisites
 
-### Automated Installation (Recommended)
+### Automated Installation
 
 You can use the provided `install.py` script to automatically create a virtual environment and install all dependencies.
 
@@ -63,7 +63,7 @@ Now you can run the scrips in VSCode using the virtual environment you created.
 
 FFmpeg is required by `field_batch.py` to create animations.
 
-#### Linux
+#### Linux (Debain based distros such as Ubuntu)
 ```bash
 sudo apt update && sudo apt install ffmpeg
 ```
