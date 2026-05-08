@@ -39,17 +39,17 @@ NUMERICS:
 field_to_plot = "T"  
 
 # Range Selection
-range_mode = "snapshot"  # Options: "snapshot" or "time"
+range_mode = "time"  # Options: "snapshot" or "time"
 snap_min = 0         # Used if range_mode is "snapshot"
 snap_max = 50         # Used if range_mode is "snapshot"
-time_min_Myr = 0        # Used if range_mode is "time"
-time_max_Myr = 1     # Used if range_mode is "time"
+time_min_Myr = 110        # Used if range_mode is "time"
+time_max_Myr = 140     # Used if range_mode is "time"
 
 # --- EXPORT SETTINGS ---
 EXPORT_SVG = False  # Set to True to also save as .svg
 TRANSPARENT_PNG = False  # Set to True for transparent PNG background
 MAKE_MOVIE = True   # Set to True to generate an MP4 movie using FFmpeg
-MOVIE_FPS = 2      # Frames per second for the movie
+MOVIE_FPS = 15      # Frames per second for the movie
 
 # --- TOGGLE ---
 mode = "constant_frame" # Options: "constant_time" or "constant_frame"
@@ -66,7 +66,7 @@ LOG_FIELDS = ["eta", "edot", "sII", "v1", "v2", "v3", "meltvel", "wtr", "meltrat
 
 # FIELD LIMITS (Min, Max)
 FIELD_LIMITS = {
-    "T": (300, 4000),
+    "T": (300, 5000),
     "basalt": (0.0, 1.0),
     "eta": (1e18, 1e25),
     "edot": (1e-18, 1e-12),
@@ -81,7 +81,7 @@ fig_height = 6
 print(f"{'='*60}\n       STAGPLOT: MULTI-FIELD VISUALIZATION       \n{'='*60}")
 
 # --- DATA PATH ---
-data_path = Path("/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/runs/euler/venus_i_01/archive")
+data_path = Path("/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/runs/lipwig/v_atm_01/archive")
 
 if not data_path.exists():
     print(f"[!] CRITICAL ERROR: Data path does not exist:\n    {data_path}")
@@ -247,9 +247,13 @@ if MAKE_MOVIE:
     movie_name = f"{folder_name}_{field_to_plot}_{mode}.mp4"
     print(f"\n[INFO] Creating movie: {movie_name}")
     
+    # Get the start number for FFmpeg
+    start_number = frames_to_render[0][0]
+    
     # FFmpeg command:
     # -y: overwrite output
     # -framerate: input FPS
+    # -start_number: first frame index
     # -i: input pattern (using frames from output_dir)
     # -c:v libx264: H.264 codec
     # -pix_fmt yuv420p: compatibility for most players
@@ -258,6 +262,7 @@ if MAKE_MOVIE:
     cmd = [
         "ffmpeg", "-y",
         "-framerate", str(MOVIE_FPS),
+        "-start_number", str(start_number),
         "-i", str(output_dir / "frame_%05d.png"),
         "-c:v", "libx264",
         "-pix_fmt", "yuv420p",
