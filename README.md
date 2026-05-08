@@ -44,6 +44,26 @@ Press ctrl+shift+p (or type ">" in the search box) and select the Python Interpr
 
 Now you can run the scrips in VSCode using the virtual environment you created.
 
+### FFmpeg Installation (Optional, used if you want to create movies directly using field_batch.py scrip)
+
+FFmpeg is required by `field_batch.py` to create animations.
+
+#### Linux (Debian based systems such as Ubuntu and it's derivatives)
+```bash
+sudo apt update && sudo apt install ffmpeg
+```
+
+#### macOS
+```bash
+brew install ffmpeg
+```
+
+#### Windows
+```powershell
+winget install ffmpeg
+```
+*Note: You may need to restart your terminal after installation.*
+
 ## Core Scripts
 
 ### 1. `info.py`
