@@ -72,8 +72,11 @@ def main():
     print("      INSTALLATION SUCCESSFUL!          ")
     print("="*40)
     print(f"\nDetected System: {system_label}")
-    print(f"To start using StagPlot, activate your environment:")
+    print(f"Open VScode in the current directory and ensure your Python Interpreter is set to {venv_name} (VSCode should automatically detect that.")
+    print(f"Now you can start using StagPlot")
+    print(f"You can also use StagPlot directly from command line. Just activate your environment first:")
     print(f"\n    {activate_cmd}")
+ 
     print("="*40)
 
 if __name__ == "__main__":
