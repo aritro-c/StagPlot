@@ -22,32 +22,37 @@ except ImportError:
 # Note: 'color' can be a name (e.g., 'red'), None, or "none" to use Crameri's colourmaps.
 RUN_CONFIG = {
   
-    "Without LA Impacts": {
-        "path": "/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/runs/festus/venus_01/archive/",
-        "style": "--",     
-        "color": "black"     
+    "Not Scaled": {
+        "path": "/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/runs/lipwig/v_atm_01/archive/",
+        "style": "-",     
+        "color": "blue"     
     },
-      "With LA Impacts ": {
-        "path": "/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/runs/euler/venus_i_01/archive/",
-        "style": "-",      
-        "color": "orange"    
-    },
+     # "Scaled (Festus)": {
+      #  "path": "/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/runs/festus/v_i_SCLD2/archive/",
+      #  "style": "--",      
+      #  "color": "orange"    
+   # },
+     #"Scaled (Lipwig)": {
+      #  "path": "/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/runs/lipwig/v_i_SCLD/archive/",
+      #  "style": "--",      
+      #  "color": "blue"    
+   # },
 }
 
 field_to_plot = "eta_amean" 
 
 # --- EXPORT SETTINGS ---
 EXPORT_SVG = False  # Set to True to also save as .svg
-TRANSPARENT_PNG = True  # Set to True for transparent PNG background
+TRANSPARENT_PNG = False  # Set to True for transparent PNG background
 
 # --- AXIS LIMITS ---
 # Set X_LIMITS to (min, max) in Gyr, or None for automatic scaling
-X_LIMITS = (0,4.5) 
+X_LIMITS = None 
 
 # MANUAL Y-AXIS LIMITS:
 # Add fields here to force specific Y-axis ranges (min, max).
 FIELD_LIMITS = {
-    "Tmean": (500, 4000),
+    #"Tmean": (500, 4000),
     #"Vrms": (1e-8, 1e-2),
     "F_mean": (0, 0.5),
     "eta_max": (1e21, 1e27),
@@ -124,9 +129,9 @@ ALL_TIME_FIELDS = {
     # Volatiles & Noble Gases
     "mH2O_total": "Total H2O mass",
     "mH2O_mantle": "H2O in mantle",
-    "outgassed_H2O": "H2O outgassed",
-    "outgassed_CO2": "CO2 outgassed",
-    "outgassed_N2": "N2 outgassed",
+    "outgassed_water": "H2O outgassed",
+    "outgassed_carbon": "CO2 outgassed",
+    "outgassed_nitrogen": "N2 outgassed",
     "outgassed_40Ar": "40Ar outgassed",
     "outgassed_4He": "4He outgassed",
     
@@ -211,11 +216,13 @@ def main():
 
                 # 5. Axis Labeling
                 if not labels_set:
-                    description = ts_data.meta.description or ALL_TIME_FIELDS.get(field_to_plot, field_to_plot)
-                    unit = ts_data.meta.dim
-                    if "eta" in field_to_plot and unit == "Pa": unit = "Pa s"
+                    meta = ts_data.meta
+                    description = meta.description or ALL_TIME_FIELDS.get(field_to_plot, field_to_plot)
+                    unit = getattr(meta, 'dim', '')
                     
-                    ax.set_ylabel(f"{description} [{unit}]" if unit else description, fontsize=14)
+                    # Clean up unit display: don't show "1" as a unit
+                    ylabel = f"{description} [{unit}]" if unit and unit != "1" else description
+                    ax.set_ylabel(ylabel, fontsize=14)
                     ax.set_xlabel("Time [Gyr]", fontsize=16)
                     ax.tick_params(axis='both', which='major', labelsize=12)
                     
