@@ -61,7 +61,7 @@ Now you can run the scrips in VSCode.
 
 ### FFmpeg Installation
 
-FFmpeg is required by `field_batch.py` to create animations.
+FFmpeg is used by `field_batch.py` if you want to create a movie of the evolution.
 
 #### Linux (Debain based distros such as Ubuntu)
 ```bash
