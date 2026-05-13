@@ -5,6 +5,7 @@ from matplotlib.ticker import LogFormatterSciNotation
 
 # StagPy is the primary library for handling StagYY output
 from stagpy.stagyydata import StagyyData
+from rich.console import Console
 
 # --- 1. CONSTANTS ---
 SECONDS_IN_GYR = 3.15576e7 * 1e9
@@ -15,6 +16,8 @@ try:
     HAS_CRAMERI = True
 except ImportError:
     HAS_CRAMERI = False
+
+console = Console()
 
 # --- 2. CONFIGURATION ---
 
@@ -27,11 +30,11 @@ RUN_CONFIG = {
         "style": "-",     
         "color": "blue"     
     },
-     # "Scaled (Festus)": {
-      #  "path": "/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/runs/festus/v_i_SCLD2/archive/",
-      #  "style": "--",      
-      #  "color": "orange"    
-   # },
+      "Scaled (Festus)": {
+        "path": "/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/runs/festus/v_i_SCLD2/archive/",
+        "style": "--",      
+        "color": "orange"    
+    },
      #"Scaled (Lipwig)": {
       #  "path": "/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/runs/lipwig/v_i_SCLD/archive/",
       #  "style": "--",      
@@ -144,13 +147,15 @@ ALL_TIME_FIELDS = {
 # --- 4. MAIN EXECUTION ---
 
 def main():
-    print(f"{'='*60}\n TIME-SERIES \n{'='*60}")
-    print(f"Target Field: {field_to_plot}")
+    console.print(f"[bold cyan]{'='*60}[/bold cyan]")
+    console.print(f"[bold cyan]                STAGPLOT: TIME-SERIES                [/bold cyan]")
+    console.print(f"[bold cyan]{'='*60}[/bold cyan]")
+    console.print(f"[green][+][/green] Target Field: [bold magenta]{field_to_plot}[/bold magenta]")
 
     if USE_CRAMERI and not HAS_CRAMERI:
-        print("[!] WARNING: 'cmcrameri' package not found. Using Matplotlib defaults.")
-        print("    HINT: To use 'roma', 'nuuk' and other scientific colormaps, install it via:")
-        print("          pip install cmcrameri")
+        console.print("[bold yellow][!] WARNING:[/bold yellow] 'cmcrameri' package not found. Using Matplotlib defaults.")
+        console.print("    [dim]HINT: To use 'roma', 'nuuk' and other scientific colormaps, install it via:[/dim]")
+        console.print("    [dim]      pip install cmcrameri[/dim]")
 
     try:
         # Initialize Figure
@@ -188,56 +193,55 @@ def main():
                 # 1. Path Validation
                 run_path = Path(cfg["path"])
                 if not run_path.exists():
-                    print(f"   [!] FAILED: Path does not exist for {run_label}")
+                    console.print(f"   [bold red][!] FAILED:[/bold red] Path does not exist for [yellow]{run_label}[/yellow]")
                     continue
                 
-                print(f"   [+] Processing {run_label}...")
-                
-                # 2. Load Data and Access Field
-                sdata = StagyyData(run_path)
-                ts_data = sdata.tseries[field_to_plot]
-                
-                # 3. Extract and Scale
-                time_gyr = ts_data.time / SECONDS_IN_GYR 
-                values = ts_data.values
-
-                # 4. Plotting
-                # Logic: Use automatic Crameri colors if "color" is None or the string "none"
-                if cfg["color"] is None or str(cfg["color"]).lower() == "none":
-                    plot_color = auto_colors[idx]
-                else:
-                    plot_color = cfg["color"]
-
-                ax.plot(time_gyr, values, 
-                        label=run_label, 
-                        linewidth=1.8, 
-                        linestyle=cfg["style"], 
-                        color=plot_color)
-
-                # 5. Axis Labeling
-                if not labels_set:
-                    meta = ts_data.meta
-                    description = meta.description or ALL_TIME_FIELDS.get(field_to_plot, field_to_plot)
-                    unit = getattr(meta, 'dim', '')
+                with console.status(f"[bold green]Processing '{run_label}'...", spinner="dots"):
+                    # 2. Load Data and Access Field
+                    sdata = StagyyData(run_path)
+                    ts_data = sdata.tseries[field_to_plot]
                     
-                    # Clean up unit display: don't show "1" as a unit
-                    ylabel = f"{description} [{unit}]" if unit and unit != "1" else description
-                    ax.set_ylabel(ylabel, fontsize=14)
-                    ax.set_xlabel("Time [Gyr]", fontsize=16)
-                    ax.tick_params(axis='both', which='major', labelsize=12)
-                    
-                    # Logarithmic scale detection
-                    log_criteria = ["log", "eta", "slog", "visc", "vrms", "vmax", "vmin", "velocity"]
-                    if any(k in field_to_plot.lower() for k in log_criteria):
-                        ax.set_yscale('log')
-                        ax.yaxis.set_major_formatter(LogFormatterSciNotation())
-                    
-                    labels_set = True
+                    # 3. Extract and Scale
+                    time_gyr = ts_data.time / SECONDS_IN_GYR 
+                    values = ts_data.values
+
+                    # 4. Plotting
+                    # Logic: Use automatic Crameri colors if "color" is None or the string "none"
+                    if cfg["color"] is None or str(cfg["color"]).lower() == "none":
+                        plot_color = auto_colors[idx]
+                    else:
+                        plot_color = cfg["color"]
+
+                    ax.plot(time_gyr, values, 
+                            label=run_label, 
+                            linewidth=1.8, 
+                            linestyle=cfg["style"], 
+                            color=plot_color)
+
+                    # 5. Axis Labeling
+                    if not labels_set:
+                        meta = ts_data.meta
+                        description = meta.description or ALL_TIME_FIELDS.get(field_to_plot, field_to_plot)
+                        unit = getattr(meta, 'dim', '')
+                        
+                        # Clean up unit display: don't show "1" as a unit
+                        ylabel = f"{description} [{unit}]" if unit and unit != "1" else description
+                        ax.set_ylabel(ylabel, fontsize=14)
+                        ax.set_xlabel("Time [Gyr]", fontsize=16)
+                        ax.tick_params(axis='both', which='major', labelsize=12)
+                        
+                        # Logarithmic scale detection
+                        log_criteria = ["log", "eta", "slog", "visc", "vrms", "vmax", "vmin", "velocity"]
+                        if any(k in field_to_plot.lower() for k in log_criteria):
+                            ax.set_yscale('log')
+                            ax.yaxis.set_major_formatter(LogFormatterSciNotation())
+                        
+                        labels_set = True
                 
-                print(f"   [OK] {run_label} added to plot.")
+                console.print(f"   [bold green][+][/bold green] [white]{run_label}[/white]: [bold green]DONE![/bold green]")
 
             except Exception as e:
-                print(f"   [!] Error: Could not process {run_label}. Detail: {e}")
+                console.print(f"   [bold red][!] Error:[/bold red] Could not process [yellow]{run_label}[/yellow]. [dim]Detail: {e}[/dim]")
                 continue
 
         # --- Final Formatting ---
@@ -249,7 +253,7 @@ def main():
         # Apply manual Y-limits if defined for this field
         if field_to_plot in FIELD_LIMITS:
             ax.set_ylim(FIELD_LIMITS[field_to_plot])
-            print(f"   [i] Manual Y-limits applied: {FIELD_LIMITS[field_to_plot]}")
+            console.print(f"   [bold blue][i][/bold blue] Manual Y-limits applied: [yellow]{FIELD_LIMITS[field_to_plot]}[/yellow]")
 
         ax.legend(loc='best', frameon=True, fontsize=14)
         ax.grid(True, which="both", ls="-", alpha=0.15)
@@ -262,20 +266,20 @@ def main():
         save_name = f"timeseries_Gyr_{field_to_plot}.png"
         fig.savefig(save_name, dpi=300, transparent=TRANSPARENT_PNG)
         
-        print(f"\n{'='*60}")
-        print(f"[SUCCESS] Plot saved as: {save_name}")
+        console.print(f"\n[bold cyan]{'='*60}[/bold cyan]")
+        console.print(f"[bold green][SUCCESS][/bold green] Plot saved as: [yellow]{save_name}[/yellow]")
         
         if EXPORT_SVG:
             svg_save_name = save_name.replace(".png", ".svg")
             fig.savefig(svg_save_name, transparent=True, dpi=300)
-            print(f"[SUCCESS] SVG exported as:  {svg_save_name}")
+            console.print(f"[bold green][SUCCESS][/bold green] SVG exported as:  [yellow]{svg_save_name}[/yellow]")
 
-        print(f"{'='*60}")
+        console.print(f"[bold cyan]{'='*60}[/bold cyan]\n")
 
         plt.show()
 
     except Exception as e:
-        print(f"\n[CRITICAL ERROR]: {e}")
+        console.print(f"\n[bold red][CRITICAL ERROR]:[/bold red] {e}")
 
 if __name__ == "__main__":
     main()
