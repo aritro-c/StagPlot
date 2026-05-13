@@ -5,6 +5,7 @@ from pathlib import Path
 from stagpy.stagyydata import StagyyData
 from matplotlib.colors import LogNorm, Normalize
 from matplotlib.ticker import LogFormatterSciNotation
+from rich.console import Console
 
 # --- COLOURMAP SYSTEM ---
 #  Try to import Fabio Crameri's colormaps
@@ -13,6 +14,8 @@ try:
     HAS_CRAMERI = True
 except ImportError:
     HAS_CRAMERI = False
+
+console = Console()
 
 
 # --- FULL LIST OF RPROF PARAMETERS ---
@@ -124,10 +127,10 @@ ALL_RPROF_FIELDS = [
 DATA_ROOT = Path("/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/runs/festus/v_i_SCLD2/archive/")
 
 # Fields to visualize ["Tmean", "fmeltmax", "elog"], (Y-axis = Depth, X-axis = Time, Color = Field Value)
-FIELDS_TO_PLOT = ["Tmean"]   
+FIELDS_TO_PLOT = ["elog"]   
 
 # Time Range in Myr (e.g., (0, 1000) or None for all)
-TIME_RANGE = (310, 370)
+TIME_RANGE = (0, 370)
 
 # --- EXPORT SETTINGS ---
 EXPORT_SVG = False  # Set to True to also save as .svg
@@ -145,7 +148,7 @@ FIELD_LIMITS = {
 }
 
 # Downsampling: 1 = every step, 10 = every 10th step.
-SAMPLE_STEP = 1
+SAMPLE_STEP = 10
 
 # Colormap Preferences
 USE_CRAMERI = True
@@ -154,22 +157,52 @@ DIVERGING_MAP  = "vik"  # Good for velocity, divergence, flux
 
 def run_visualizer():
     # --- 1. INITIALIZATION ---
-    print(f"{'='*60}\n RPROF-TIME \n{'='*60}")
+    console.print(f"[bold cyan]{'='*60}[/bold cyan]")
+    console.print(f"[bold cyan]                STAGPLOT: RPROF-TIME                [/bold cyan]")
+    console.print(f"[bold cyan]{'='*60}[/bold cyan]")
     
     if USE_CRAMERI and not HAS_CRAMERI:
-        print("[!] WARNING: 'cmcrameri' package not found. Using Matplotlib defaults.")
-        print("    HINT: To use 'vik' and other scientific colormaps, install it via:")
-        print("          pip install cmcrameri")
+        console.print("[bold yellow][!] WARNING:[/bold yellow] 'cmcrameri' package not found. Using Matplotlib defaults.")
+        console.print("    [dim]HINT: To use 'vik' and other scientific colormaps, install it via:[/dim]")
+        console.print("    [dim]      pip install cmcrameri[/dim]")
 
     if not DATA_ROOT.exists():
-        print(f"CRITICAL ERROR: The path '{DATA_ROOT}' does not exist.")
-        print("Please check your 'DATA_ROOT' configuration at the top of the script.")
+        console.print(f"[bold red][!] CRITICAL ERROR:[/bold red] The path '[yellow]{DATA_ROOT}[/yellow]' does not exist.")
+        console.print("    Please check your 'DATA_ROOT' configuration at the top of the script.")
         return
 
-    print(f"[*] Loading StagYY Data at: {DATA_ROOT.name}")
-    sdat = StagyyData(DATA_ROOT)
+    console.print(f"[green][+][/green] Loading StagYY Data at: [yellow]{DATA_ROOT.name}[/yellow]")
     
-    snaps_to_process = sdat.snaps[::SAMPLE_STEP]
+    # Step 1: Indexing snapshots
+    with console.status("[bold green]Indexing snapshots...", spinner="dots"):
+        sdat = StagyyData(DATA_ROOT)
+        all_snaps = list(sdat.snaps[::SAMPLE_STEP])
+    console.print(f"[bold green][+][/bold green] Indexing snapshots: [bold green]DONE![/bold green] ([bold white]{len(all_snaps)}[/bold white] found)")
+
+    # Step 2: Filtering by Time Range
+    with console.status("[bold green]Filtering by time range...", spinner="dots"):
+        if TIME_RANGE is not None:
+            snaps_to_process = []
+            for snap in all_snaps:
+                current_time = snap.time / (3600 * 24 * 365.25 * 1e6)
+                if TIME_RANGE[0] <= current_time <= TIME_RANGE[1]:
+                    snaps_to_process.append(snap)
+        else:
+            snaps_to_process = all_snaps
+    console.print("[bold green][+][/bold green] Filtering by time range: [bold green]DONE![/bold green]")
+    
+    num_snaps = len(snaps_to_process)
+    if num_snaps == 0:
+        console.print("[bold red][!] ERROR:[/bold red] No snapshots found in the specified range.")
+        return
+
+    first_step = snaps_to_process[0].istep
+    last_step = snaps_to_process[-1].istep
+    
+    console.print(f"[green][+][/green] Found [bold cyan]{num_snaps}[/bold cyan] snapshots to process (Steps: [yellow]{first_step}[/yellow] to [yellow]{last_step}[/yellow])")
+    
+    fields_str = ", ".join([f"[bold magenta]{f}[/bold magenta]" for f in FIELDS_TO_PLOT])
+    console.print(f"[green][+][/green] Processing fields: {fields_str}")
 
     # Data structures for plotting
     times, depths = [], None
@@ -177,61 +210,58 @@ def run_visualizer():
     field_meta = {f: {"title": "", "log": False} for f in FIELDS_TO_PLOT}
 
     # --- 2. DATA COLLECTION LOOP ---
-    print(f"[*] Reading {len(FIELDS_TO_PLOT)} fields across snapshots...")
+    console.print(f"[green][+][/green] Reading fields across snapshots...")
 
-    for idx, snap in enumerate(snaps_to_process):
-        try:
-            # Progress update in console
-            if (idx + 1) % 10 == 0:
-                print(f"    > Reading Snapshot {idx+1} (Step: {snap.istep})", end='\r')
-
-            # Unit Conversion: Seconds to Megayears (Myr)
-            current_time = snap.time / (3600 * 24 * 365.25 * 1e6)
-            
-            # Filter by time range if specified
-            if TIME_RANGE is not None:
-                if current_time < TIME_RANGE[0] or current_time > TIME_RANGE[1]:
-                    continue
-
-            # Temporary storage to ensure ALL fields exist for this snapshot before adding
-            temp_field_data = {}
-            for field in FIELDS_TO_PLOT:
-                rprof = snap.rprofs[field] # This is where 'Details: 0' likely happened
-                temp_field_data[field] = rprof.values
+    with console.status("[bold green]Starting data collection...", spinner="dots") as status:
+        for idx, snap in enumerate(snaps_to_process):
+            try:
+                # Update main snapshot count
+                status.update(f"[bold green]Processing snapshot {idx+1}/{num_snaps} (Step {snap.istep})...")
                 
-                # Capture metadata only once
-                if not field_meta[field]["title"]:
-                    desc, unit = rprof.meta.description, rprof.meta.dim
-                    field_meta[field]["title"] = f"{desc} ({unit})" if unit else desc
+                # Unit Conversion: Seconds to Megayears (Myr)
+                current_time = snap.time / (3600 * 24 * 365.25 * 1e6)
+                
+                # Temporary storage to ensure ALL fields exist for this snapshot before adding
+                temp_field_data = {}
+                for field in FIELDS_TO_PLOT:
+                    # More granular update for each field
+                    status.update(f"[bold green]Processing {idx+1}/{num_snaps} - Reading [magenta]{field}[/magenta] (Step {snap.istep})...")
+                    rprof = snap.rprofs[field] 
+                    temp_field_data[field] = rprof.values
                     
-                    log_keywords = ["log", "eta", "slog", "visc", "vrms", "vmax", "vmin"]
-                    if any(k in field.lower() for k in log_keywords):
-                        field_meta[field]["log"] = True
+                    # Capture metadata only once
+                    if not field_meta[field]["title"]:
+                        desc, unit = rprof.meta.description, rprof.meta.dim
+                        field_meta[field]["title"] = f"{desc} ({unit})" if unit else desc
+                        
+                        log_keywords = ["log", "eta", "slog", "visc", "vrms", "vmax", "vmin"]
+                        if any(k in field.lower() for k in log_keywords):
+                            field_meta[field]["log"] = True
 
-                # Calculate depths (m to km) once
-                if depths is None:
-                    r_surf = np.max(rprof.rad)
-                    depths = (r_surf - rprof.rad) / 1e3 
+                    # Calculate depths (m to km) once
+                    if depths is None:
+                        r_surf = np.max(rprof.rad)
+                        depths = (r_surf - rprof.rad) / 1e3 
 
-            # If we reached here, all fields were found successfully
-            times.append(current_time)
-            for field in FIELDS_TO_PLOT:
-                plot_data[field].append(temp_field_data[field])
-        
-        except Exception as e:
-            # More descriptive error reporting
-            print(f"\n[!] WARNING: Skipping snapshot {idx} (Step {snap.istep})")
-            print(f"    Error Type: {type(e).__name__} | Details: {e}")
-            continue
+                # If we reached here, all fields were found successfully
+                times.append(current_time)
+                for field in FIELDS_TO_PLOT:
+                    plot_data[field].append(temp_field_data[field])
+            
+            except Exception as e:
+                # More descriptive error reporting
+                console.print(f"[bold yellow][!] WARNING:[/bold yellow] Skipping snapshot {idx} (Step {snap.istep})")
+                console.print(f"    [dim]Error Type: {type(e).__name__} | Details: {e}[/dim]")
+                continue
 
     # --- 3. FINAL VALIDATION ---
     if not times:
-        print("\n\nERROR: No data was collected. Possible reasons:")
-        print(f"1. Fields {FIELDS_TO_PLOT} do not exist in these snapshots.")
-        print("2. The StagYY output files are corrupted or empty.")
+        console.print("\n[bold red][!] ERROR:[/bold red] No data was collected. Possible reasons:")
+        console.print(f"    1. Fields [bold magenta]{FIELDS_TO_PLOT}[/bold magenta] do not exist in these snapshots.")
+        console.print("    2. The StagYY output files are corrupted or empty.")
         return
 
-    print(f"\n[*] Data loading complete ({len(times)} valid snapshots). Generating plots...")
+    console.print(f"\n[green][+][/green] Data loading complete ([bold green]{len(times)}[/bold green] valid snapshots). Generating plots...")
 
     # --- 4. PLOTTING ENGINE ---
     fig, axes = plt.subplots(len(FIELDS_TO_PLOT), 1, 
@@ -300,18 +330,19 @@ def run_visualizer():
 
     save_name = f"evol_{'_'.join(FIELDS_TO_PLOT)}.png"
     fig.savefig(save_name, dpi=300, bbox_inches='tight', transparent=TRANSPARENT_PNG)
-    print(f"[*] SUCCESS: Plot saved as '{save_name}'")
+    console.print(f"[bold green][SUCCESS][/bold green] Plot saved as: [yellow]{save_name}[/yellow]")
 
     if EXPORT_SVG:
         svg_save_name = save_name.replace(".png", ".svg")
         fig.savefig(svg_save_name, bbox_inches='tight', transparent=True, dpi=300)
-        print(f"[*] SUCCESS: SVG exported as '{svg_save_name}'")
+        console.print(f"[bold green][SUCCESS][/bold green] SVG exported as: [yellow]{svg_save_name}[/yellow]")
     
+    console.print(f"[bold cyan]{'='*60}[/bold cyan]\n")
     plt.show()
 
 if __name__ == "__main__":
     try:
         run_visualizer()
     except KeyboardInterrupt:
-        print("\n[!] Execution interrupted by user.")
+        console.print("\n[bold red][!] Execution interrupted by user.[/bold red]")
         sys.exit(0)
