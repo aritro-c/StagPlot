@@ -121,14 +121,17 @@ ALL_RPROF_FIELDS = [
 
 # --- USER CONFIGURATION ---
 # Define the path to your StagYY 'archive' directory.
-DATA_ROOT = Path("/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/runs/euler/venus_i_01/archive/")
+DATA_ROOT = Path("/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/runs/festus/v_i_SCLD2/archive/")
 
 # Fields to visualize ["Tmean", "fmeltmax", "elog"], (Y-axis = Depth, X-axis = Time, Color = Field Value)
-FIELDS_TO_PLOT = ["vrms"]   
+FIELDS_TO_PLOT = ["Tmean"]   
+
+# Time Range in Myr (e.g., (0, 1000) or None for all)
+TIME_RANGE = (310, 370)
 
 # --- EXPORT SETTINGS ---
 EXPORT_SVG = False  # Set to True to also save as .svg
-TRANSPARENT_PNG = True  # Set to True for transparent PNG background
+TRANSPARENT_PNG = False  # Set to True for transparent PNG background
 
 # Manual limits for specific fields to ensure consistency across different runs.
 FIELD_LIMITS = {
@@ -142,12 +145,12 @@ FIELD_LIMITS = {
 }
 
 # Downsampling: 1 = every step, 10 = every 10th step.
-SAMPLE_STEP = 10
+SAMPLE_STEP = 1
 
 # Colormap Preferences
 USE_CRAMERI = True
-SEQUENTIAL_MAP = "lajolla"   # Good for T, viscosity, composition
-DIVERGING_MAP  = "lajolla"  # Good for velocity, divergence, flux
+SEQUENTIAL_MAP = "vik"   # Good for T, viscosity, composition
+DIVERGING_MAP  = "vik"  # Good for velocity, divergence, flux
 
 def run_visualizer():
     # --- 1. INITIALIZATION ---
@@ -185,6 +188,11 @@ def run_visualizer():
             # Unit Conversion: Seconds to Megayears (Myr)
             current_time = snap.time / (3600 * 24 * 365.25 * 1e6)
             
+            # Filter by time range if specified
+            if TIME_RANGE is not None:
+                if current_time < TIME_RANGE[0] or current_time > TIME_RANGE[1]:
+                    continue
+
             # Temporary storage to ensure ALL fields exist for this snapshot before adding
             temp_field_data = {}
             for field in FIELDS_TO_PLOT:
@@ -285,6 +293,9 @@ def run_visualizer():
                 cbar.formatter.set_powerlimits((0, 0))
 
     axes[-1, 0].set_xlabel("Time (Myr)", fontsize=12, fontweight='bold')
+    if TIME_RANGE is not None:
+        axes[-1, 0].set_xlim(TIME_RANGE)
+        
     plt.tight_layout(rect=[0, 0, 0.95, 1])
 
     save_name = f"evol_{'_'.join(FIELDS_TO_PLOT)}.png"
