@@ -124,31 +124,34 @@ ALL_RPROF_FIELDS = [
 
 # --- USER CONFIGURATION ---
 # Define the path to your StagYY 'archive' directory.
-DATA_ROOT = Path("/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/runs/festus/v_i_SCLD2/archive/")
+DATA_ROOT = Path("/run/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/archive_runs/euler/venus_i_01/archive/")
 
 # Fields to visualize ["Tmean", "fmeltmax", "elog"], (Y-axis = Depth, X-axis = Time, Color = Field Value)
-FIELDS_TO_PLOT = ["elog"]   
+FIELDS_TO_PLOT = ["vrms"]   
 
 # Time Range in Myr (e.g., (0, 1000) or None for all)
-TIME_RANGE = (0, 370)
+TIME_RANGE = (0, 400)
 
 # --- EXPORT SETTINGS ---
 EXPORT_SVG = False  # Set to True to also save as .svg
-TRANSPARENT_PNG = False  # Set to True for transparent PNG background
+TRANSPARENT_PNG = True  # Set to True for transparent PNG background
+FIG_WIDTH = 9      # Figure width in inches, default is 12
+FIG_HEIGHT_PER_FIELD = 4  # Height per field in inches, default is 4
 
 # Manual limits for specific fields to ensure consistency across different runs.
 FIELD_LIMITS = {
     "Tmax": (500, 4000),
     "Tmean": (500, 4000),
     "vmax": (1e-6, 1.2e-3),
-   # "vrms": (1e-8, 1e-2), 
+    "vrms": (1e-11, 1e-3), 
     "fmeltmax": (0, 1.0),
     "bsmean": (0, 1.0),
+    "elog": (1e-17, 1e-10),
    # "etalog": (1e18, 1e24),
 }
 
 # Downsampling: 1 = every step, 10 = every 10th step.
-SAMPLE_STEP = 10
+SAMPLE_STEP = 5
 
 # Colormap Preferences
 USE_CRAMERI = True
@@ -173,63 +176,62 @@ def run_visualizer():
 
     console.print(f"[green][+][/green] Loading StagYY Data at: [yellow]{DATA_ROOT.name}[/yellow]")
     
-    # Step 1: Indexing snapshots
-    with console.status("[bold green]Indexing snapshots...", spinner="dots"):
-        sdat = StagyyData(DATA_ROOT)
-        all_snaps = list(sdat.snaps[::SAMPLE_STEP])
-    console.print(f"[bold green][+][/bold green] Indexing snapshots: [bold green]DONE![/bold green] ([bold white]{len(all_snaps)}[/bold white] found)")
-
-    # Step 2: Filtering by Time Range
-    with console.status("[bold green]Filtering by time range...", spinner="dots"):
-        if TIME_RANGE is not None:
-            snaps_to_process = []
-            for snap in all_snaps:
-                current_time = snap.time / (3600 * 24 * 365.25 * 1e6)
-                if TIME_RANGE[0] <= current_time <= TIME_RANGE[1]:
-                    snaps_to_process.append(snap)
-        else:
-            snaps_to_process = all_snaps
-    console.print("[bold green][+][/bold green] Filtering by time range: [bold green]DONE![/bold green]")
-    
-    num_snaps = len(snaps_to_process)
-    if num_snaps == 0:
-        console.print("[bold red][!] ERROR:[/bold red] No snapshots found in the specified range.")
-        return
-
-    first_step = snaps_to_process[0].istep
-    last_step = snaps_to_process[-1].istep
-    
-    console.print(f"[green][+][/green] Found [bold cyan]{num_snaps}[/bold cyan] snapshots to process (Steps: [yellow]{first_step}[/yellow] to [yellow]{last_step}[/yellow])")
-    
     fields_str = ", ".join([f"[bold magenta]{f}[/bold magenta]" for f in FIELDS_TO_PLOT])
     console.print(f"[green][+][/green] Processing fields: {fields_str}")
 
-    # Data structures for plotting
+    range_info = f"([yellow]{TIME_RANGE[0]}-{TIME_RANGE[1]} Myr[/yellow])" if TIME_RANGE else "([yellow]All Snapshots[/yellow])"
+    console.print(f"[green][+][/green] Selected range: {range_info} (Sample Step: [bold white]{SAMPLE_STEP}[/bold white])")
+
+    # Step 1: Initializing data access
+    with console.status("[bold green]Initializing StagyyData...", spinner="dots"):
+        sdat = StagyyData(DATA_ROOT)
+        # Avoid list() here to keep it lazy
+        all_snaps_lazy = sdat.snaps[::SAMPLE_STEP]
+        
+    SEC_PER_MYR = 3600 * 24 * 365.25 * 1e6
+
+    # Step 2: Filtering and Range Detection
+    snaps_in_range = []
+    with console.status("[bold green]Filtering snapshots by range...", spinner="dots"):
+        for snap in all_snaps_lazy:
+            try:
+                current_time_myr = snap.time / SEC_PER_MYR
+                if TIME_RANGE is not None:
+                    if TIME_RANGE[0] <= current_time_myr <= TIME_RANGE[1]:
+                        snaps_in_range.append(snap)
+                else:
+                    snaps_in_range.append(snap)
+            except:
+                continue
+
+    num_to_process = len(snaps_in_range)
+    if num_to_process == 0:
+        console.print("\n[bold red][!] ERROR:[/bold red] No snapshots found in the specified range.")
+        return
+
+    first_step = snaps_in_range[0].istep
+    last_step = snaps_in_range[-1].istep
+
+    console.print(f"[green][+][/green] Found [bold cyan]{num_to_process}[/bold cyan] snapshots in the selected range (Steps: [yellow]{first_step}[/yellow] to [yellow]{last_step}[/yellow])")
+    
+    # Step 3: Data Collection
     times, depths = [], None
     plot_data = {f: [] for f in FIELDS_TO_PLOT}
     field_meta = {f: {"title": "", "log": False} for f in FIELDS_TO_PLOT}
-
-    # --- 2. DATA COLLECTION LOOP ---
-    console.print(f"[green][+][/green] Reading fields across snapshots...")
-
+    
     with console.status("[bold green]Starting data collection...", spinner="dots") as status:
-        for idx, snap in enumerate(snaps_to_process):
+        for idx, snap in enumerate(snaps_in_range):
             try:
-                # Update main snapshot count
-                status.update(f"[bold green]Processing snapshot {idx+1}/{num_snaps} (Step {snap.istep})...")
+                current_time_myr = snap.time / SEC_PER_MYR
+                status.update(f"[bold green]Processing snapshot {idx+1}/{num_to_process} (Step {snap.istep}, {current_time_myr:.1f} Myr)...")
                 
-                # Unit Conversion: Seconds to Megayears (Myr)
-                current_time = snap.time / (3600 * 24 * 365.25 * 1e6)
-                
-                # Temporary storage to ensure ALL fields exist for this snapshot before adding
+                # Read Fields
                 temp_field_data = {}
                 for field in FIELDS_TO_PLOT:
-                    # More granular update for each field
-                    status.update(f"[bold green]Processing {idx+1}/{num_snaps} - Reading [magenta]{field}[/magenta] (Step {snap.istep})...")
                     rprof = snap.rprofs[field] 
                     temp_field_data[field] = rprof.values
                     
-                    # Capture metadata only once
+                    # Capture metadata once
                     if not field_meta[field]["title"]:
                         desc, unit = rprof.meta.description, rprof.meta.dim
                         field_meta[field]["title"] = f"{desc} ({unit})" if unit else desc
@@ -243,29 +245,26 @@ def run_visualizer():
                         r_surf = np.max(rprof.rad)
                         depths = (r_surf - rprof.rad) / 1e3 
 
-                # If we reached here, all fields were found successfully
-                times.append(current_time)
+                # All fields for this snap successfully read
+                times.append(current_time_myr)
                 for field in FIELDS_TO_PLOT:
                     plot_data[field].append(temp_field_data[field])
             
             except Exception as e:
-                # More descriptive error reporting
-                console.print(f"[bold yellow][!] WARNING:[/bold yellow] Skipping snapshot {idx} (Step {snap.istep})")
-                console.print(f"    [dim]Error Type: {type(e).__name__} | Details: {e}[/dim]")
+                console.print(f"[bold yellow][!] WARNING:[/bold yellow] Skipping snapshot Step {getattr(snap, 'istep', 'unknown')}")
+                console.print(f"    [dim]{e}[/dim]")
                 continue
 
-    # --- 3. FINAL VALIDATION ---
+    # --- 4. FINAL VALIDATION ---
     if not times:
-        console.print("\n[bold red][!] ERROR:[/bold red] No data was collected. Possible reasons:")
-        console.print(f"    1. Fields [bold magenta]{FIELDS_TO_PLOT}[/bold magenta] do not exist in these snapshots.")
-        console.print("    2. The StagYY output files are corrupted or empty.")
+        console.print("\n[bold red][!] ERROR:[/bold red] No data was collected.")
         return
 
     console.print(f"\n[green][+][/green] Data loading complete ([bold green]{len(times)}[/bold green] valid snapshots). Generating plots...")
 
     # --- 4. PLOTTING ENGINE ---
     fig, axes = plt.subplots(len(FIELDS_TO_PLOT), 1, 
-                             figsize=(12, 4 * len(FIELDS_TO_PLOT)), 
+                             figsize=(FIG_WIDTH, FIG_HEIGHT_PER_FIELD * len(FIELDS_TO_PLOT)), 
                              sharex=True, squeeze=False)
 
     for i, field in enumerate(FIELDS_TO_PLOT):
