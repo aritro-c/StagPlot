@@ -61,11 +61,11 @@ RUN_CONFIG = {
         "style": "-",     
         "color": "blue"     
     },
-      #"Scaled (Festus)": {
-        #"path": "/run/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/archive_runs/lipwig/v_atm_01/archive/",
-        #"style": "--",      
-        #"color": "orange"    
-    #},
+      "Scaled (Festus)": {
+        "path": "/run/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/archive_runs/lipwig/v_atm_01/archive/",
+        "style": "--",      
+        "color": "orange"    
+    },
      #"Scaled (Lipwig)": {
       #  "path": "/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/runs/lipwig/v_i_SCLD/archive/",
       #  "style": "--",      
@@ -73,7 +73,7 @@ RUN_CONFIG = {
    # },
 }
 
-field_to_plot = "Vmin" 
+field_to_plot = "Vrms" 
 
 # --- EXPORT SETTINGS ---
 EXPORT_SVG = False  # Set to True to also save as .svg
@@ -102,7 +102,7 @@ SECONDS_IN_GYR = 3.15576e7 * 1e9
 
 def force_hdf5_if_needed(sdata):
     """
-    Forces StagyyData to recognize HDF5 mode if TimeSeries.h5 exists
+    Forces StagyyData to recognize HDF5 mode if TimeSeries.h5 or rprof.h5 exists
     but Data.xmf (StagPy's default anchor) is missing.
     """
     if sdata.hdf5 is None:
@@ -111,7 +111,7 @@ def force_hdf5_if_needed(sdata):
         possible_h5_folders = ["+hdf5", "../+hdf5"]
         for folder in possible_h5_folders:
             h5_path = (sdata.path / folder).resolve()
-            if (h5_path / "TimeSeries.h5").is_file():
+            if (h5_path / "TimeSeries.h5").is_file() or (h5_path / "rprof.h5").is_file():
                 # We use object.__setattr__ because StagyyData is a frozen dataclass
                 # This populates the cached_property 'hdf5'
                 object.__setattr__(sdata, "hdf5", h5_path)
