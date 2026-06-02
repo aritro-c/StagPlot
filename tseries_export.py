@@ -22,14 +22,14 @@ SECONDS_IN_YEAR = 3.15576e7
 
 def force_hdf5_if_needed(sdata):
     """
-    Forces StagyyData to recognize HDF5 mode if TimeSeries.h5 exists
+    Forces StagyyData to recognize HDF5 mode if TimeSeries.h5 or rprof.h5 exists
     but Data.xmf (StagPy's default anchor) is missing.
     """
     if sdata.hdf5 is None:
         possible_h5_folders = ["+hdf5", "../+hdf5"]
         for folder in possible_h5_folders:
             h5_path = (sdata.path / folder).resolve()
-            if (h5_path / "TimeSeries.h5").is_file():
+            if (h5_path / "TimeSeries.h5").is_file() or (h5_path / "rprof.h5").is_file():
                 object.__setattr__(sdata, "hdf5", h5_path)
                 return True
     return sdata.hdf5 is not None
