@@ -7,16 +7,16 @@ A suite of Python scripts for post-processing and visualizing output from **Stag
 
 ### Automated Installation
 
-You can use the provided `install.py` script to automatically create a virtual environment and install all dependencies.
+You can use one single command to automatically download all the files, create a virtual environment and install all dependencies:
 
 **Linux and macOS:**
 ```bash
-python3 install.py
+curl -LO https://github.com/aritro-c/StagPlot/archive/refs/heads/main.zip && unzip main.zip && cd StagPlot-main && python3 install.py && rm ../main.zip
 ```
 
 **Windows:**
 ```powershell
-python install.py
+Invoke-WebRequest -Uri "https://github.com/aritro-c/StagPlot/archive/refs/heads/main.zip" -OutFile "main.zip"; Expand-Archive -Path "main.zip" -Force; cd main\StagPlot-main; python install.py
 ```
 
 ### Manual Installation
