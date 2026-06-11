@@ -24,6 +24,20 @@ def main():
     print("========================================")
     print("     StagPlot Installation Script       ")
     print("========================================")
+
+    # Prompt user for StagPy version
+    print("\nWhich version of StagPy would you like to install?")
+    print("1: Release version (stable, via PyPI)")
+    print("2: Development version (latest, via GitHub)")
+    
+    choice = ""
+    while choice not in ['1', '2']:
+        choice = input("Enter 1 or 2 [default: 1]: ").strip()
+        if not choice:
+            choice = '1'
+
+    stagpy_version_label = "Release (stable)" if choice == '1' else "Development (GitHub)"
+    is_dev = (choice == '2')
     
     # 1. Create virtual environment
     venv_name = "StagPlot"
@@ -48,7 +62,8 @@ def main():
     run_command([python_path, "-m", "pip", "install", "--upgrade", "pip"])
     
     # 4. Install dependencies
-    dependencies = ["stagpy", "cmcrameri", "numpy", "matplotlib"]
+    stagpy_dep = "git+https://github.com/StagPython/StagPy.git" if is_dev else "stagpy"
+    dependencies = [stagpy_dep, "cmcrameri", "numpy", "matplotlib"]
     print(f"[*] Installing dependencies: {', '.join(dependencies)}...")
     run_command([pip_path, "install"] + dependencies)
     
@@ -72,6 +87,7 @@ def main():
     print("      INSTALLATION SUCCESSFUL!          ")
     print("="*40)
     print(f"\nDetected OS: {system_label}")
+    print(f"StagPy Version Installed: {stagpy_version_label}")
     print(f"  ")
     print(f"Open VScode in the current directory and ensure your Python Interpreter is set to '{venv_name}' (VSCode should automatically detect that). Now you can start using StagPlot. Enjoy ;)")
     print(f"  ")
