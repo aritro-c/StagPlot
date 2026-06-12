@@ -17,18 +17,18 @@ except ImportError:
 # CONFIGURATION
 # =============================================================================
 # Path to the directory containing StagYY archive files
-directory = Path('/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/runs/euler/venus_i_01/archive/')
+directory = Path('/home/aritro/Documents/Academia/#PhD/StagYY/archive_runs/hdf/archive/hdf/')
 file_name = 'noGI'
 
-start_frame = 0
-end_frame = 17000
-step = 20
+start_frame = 471
+end_frame = 501
+step = 1
 
 # Toggle which fields to process and plot
 include_topography = False
-include_age        = False
+include_age        = True
 include_strainrate = True
-include_velocity   = False
+include_velocity   = True
 include_crustthick = True
 
 save_svg = False
@@ -93,7 +93,8 @@ def main():
     frames = np.arange(start_frame, end_frame + 1, step)
     
     # We will keep only frames that actually exist in the simulation
-    valid_frames = [f for f in frames if f in sdat.snaps]
+    available_snaps = {step.isnap for step in sdat.snaps}
+    valid_frames = [int(f) for f in frames if int(f) in available_snaps]
     if not valid_frames:
         print(f"[!] ERROR: No snapshots found in the given range. Exiting.")
         return
@@ -119,6 +120,8 @@ def main():
             
         print(f"[INFO] Grid size: {n_angle} angular points, {n_frames} temporal points.")
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         print(f"[!] ERROR determining grid size: {e}")
         return
 
@@ -160,24 +163,27 @@ def main():
                         vx = snap.fields['v1'].values[:, :, -1, :]
                         vy = snap.fields['v2'].values[:, :, -1, :]
                         vh = vscale * np.sqrt(vx**2 + vy**2)
-                        surf_data = vh
+                        
+                        # Velocity grids might have ghost nodes (e.g., shape (2, 513) instead of (1, 512))
+                        # We need to slice it down to the actual grid size
+                        surf_data = vh[:1, :n_angle] 
                     else:
                         continue
                 else:
-                    if field_type not in snap.fields:
-                        continue
-                    
-                    data = snap.fields[field_type].values
-                    
-                    if field_type == 'topo_top':
-                        # topo_top is usually 2D already
-                        surf_data = data * Dscale
-                    elif field_type == 'crust':
-                        # crustal thickness is usually 2D already
+                    if field_type == 'crust' or field_type == 'topo_top':
+                        if field_type not in snap.sfields:
+                            continue
+                        data = snap.sfields[field_type].values
+                        # Surface fields are already 2D
                         surf_data = data * Dscale
                     else:
-                        # For 3D fields like age or edot, extract the surface layer
-                        surf_data = data[:, :, -1, :]
+                        if field_type not in snap.fields:
+                            continue
+                        data = snap.fields[field_type].values
+                        # For 3D fields like age or edot, extract the surface layer (last z index)
+                        # stagpy field shape is usually (x, y, z, block)
+                        nz = data.shape[2]
+                        surf_data = data[:, :, nz-1, :]
                         if field_type == 'age':
                             surf_data *= tscale
 
@@ -197,8 +203,7 @@ def main():
                     got_time = True
                     
             except Exception as e:
-                # Silently skip if a field cannot be processed for a frame
-                pass
+                print(f"       [!] Error processing {field_type} in frame {frame}: {type(e).__name__} - {e}")
 
     # =========================================================================
     # PLOTTING
