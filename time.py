@@ -56,24 +56,24 @@ CORE & GEOMETRY:
 # Note: 'color' can be a name (e.g., 'red'), None, or "none" to use Crameri's colourmaps.
 RUN_CONFIG = {
   
-    "Not Scaled": {
-        "path": "/run/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/archive_runs/lipwig/hdf/archive/",
+    "HDF": {
+        "path": "/home/aritro/Documents/Academia/#PhD/StagYY/archive_runs/hdf/archive/hdf/",
         "style": "-",     
-        "color": "blue"     
-    },
-      "Scaled (Festus)": {
-        "path": "/run/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/archive_runs/lipwig/v_atm_01/archive/",
-        "style": "--",      
-        "color": "orange"    
-    },
+        "color": "red"     
+    #},
+      #"Scaled (Festus)": {
+        #"path": "/run/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/archive_runs/lipwig/v_atm_01/archive/",
+        #"style": "--",      
+        #"color": "orange"    
+    #},
      #"Scaled (Lipwig)": {
       #  "path": "/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/runs/lipwig/v_i_SCLD/archive/",
       #  "style": "--",      
       #  "color": "blue"    
-   # },
+    },
 }
 
-field_to_plot = "Vrms" 
+field_to_plot = "mobility" 
 
 # --- EXPORT SETTINGS ---
 EXPORT_SVG = False  # Set to True to also save as .svg
@@ -99,24 +99,6 @@ DIVERGING_MAP  = "nuuk"
 
 # --- 3. CONSTANTS ---
 SECONDS_IN_GYR = 3.15576e7 * 1e9
-
-def force_hdf5_if_needed(sdata):
-    """
-    Forces StagyyData to recognize HDF5 mode if TimeSeries.h5 or rprof.h5 exists
-    but Data.xmf (StagPy's default anchor) is missing.
-    """
-    if sdata.hdf5 is None:
-        # Check common HDF5 locations relative to the run path
-        # 1. subfolder +hdf5, 2. sibling +hdf5 folder
-        possible_h5_folders = ["+hdf5", "../+hdf5"]
-        for folder in possible_h5_folders:
-            h5_path = (sdata.path / folder).resolve()
-            if (h5_path / "TimeSeries.h5").is_file() or (h5_path / "rprof.h5").is_file():
-                # We use object.__setattr__ because StagyyData is a frozen dataclass
-                # This populates the cached_property 'hdf5'
-                object.__setattr__(sdata, "hdf5", h5_path)
-                return True
-    return sdata.hdf5 is not None
 
 # Try to import Fabio Crameri's colormaps; fallback if not installed
 try:
@@ -188,9 +170,6 @@ def main():
                 with console.status(f"[bold green]Processing '{run_label}'...", spinner="dots"):
                     # 2. Load Data and Access Field
                     sdata = StagyyData(run_path)
-                    
-                    # Force HDF5 detection if standard detection fails
-                    force_hdf5_if_needed(sdata)
                     
                     ts_data = sdata.tseries[field_to_plot]
                     
