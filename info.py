@@ -12,6 +12,8 @@ Optimized for speed by only reading the first and last available snapshots.
 """
 
 # --- CONFIGURATION ---
+DATA_DIRECTORY = "/home/aritro/Documents/Academia/#PhD/StagYY/archive_runs/hdf/archive/hdf/" # Put your directory path here
+
 SEC_PER_MYR = 1e6 * 365.25 * 24 * 3600
 SEC_PER_GYR = 1e3 * SEC_PER_MYR
 
@@ -38,17 +40,7 @@ def format_time(t_seconds):
 
 def main():
     # 1. Determine Data Path
-    # Priority: CLI argument > Current Directory > Hardcoded Fallback
-    if len(sys.argv) > 1 and not sys.argv[1].startswith("-"):
-        data_path = Path(sys.argv[1])
-    else:
-        data_path = Path.cwd()
-
-    # If CWD doesn't look like a StagYY run, try the user's known path
-    if not (data_path / "par").exists() and not (data_path / "archive" / "par").exists():
-        fallback_path = Path("/run/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/archive_runs/euler/v_i3D_03/archive/")
-        if fallback_path.exists():
-            data_path = fallback_path
+    data_path = Path(DATA_DIRECTORY)
 
     # --- 0. STARTUP HEADER ---
     console.print(f"\n[bold cyan]{'='*60}[/bold cyan]")
