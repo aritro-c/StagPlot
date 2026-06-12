@@ -19,6 +19,8 @@ curl -LO https://github.com/aritro-c/StagPlot/archive/refs/heads/main.zip && unz
 Invoke-WebRequest -Uri "https://github.com/aritro-c/StagPlot/archive/refs/heads/main.zip" -OutFile "main.zip"; Expand-Archive -Path "main.zip" -Force; cd main\StagPlot-main; python install.py
 ```
 
+Important for Linux users: If you use VSCode, it is NOT RECCOMMENDED to use the Flatpak/Snap version. It may cause errors finding the proper Python binary. Install VSCode as a system package instead. Check their documentation.
+
 ### Manual Installation
 If you prefer to set it up manually:
 
