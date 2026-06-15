@@ -1,109 +1,106 @@
-# StagPlot 
-### (CONSTRUCTION SITE AHEAD!)
+# StagPlot
 
-A suite of Python scripts for post-processing and visualizing output from **StagYY**, a numerical mantle convection code. The scripts use the **StagPy** library as a backend to interface with simulation data.
+StagPlot is a suite of Python scripts designed for post-processing and visualizing output from **StagYY**, a numerical mantle convection code. It uses the [StagPy](https://stagpy.readthedocs.io/) library as a backend to interface with simulation data.
 
-## Prerequisites
+---
 
-### Automated Installation
+## 🚀 Quick Start (Automated Installation)
 
-You can use one single command to automatically download all the files, create a virtual environment and install all dependencies:
+The easiest way to get started is to use the automated installation script. This will download the latest version, create a virtual environment, and install all necessary dependencies.
 
-**Linux and macOS:**
+### Linux & macOS
 ```bash
-curl -LO https://github.com/aritro-c/StagPlot/archive/refs/heads/main.zip && unzip main.zip && cd StagPlot-main && python3 install.py && rm ../main.zip
+curl -LO https://github.com/aritro-c/StagPlot/archive/refs/heads/main.zip
+unzip main.zip
+cd StagPlot-main
+python3 install.py
+rm ../main.zip
+```
+
+### Windows
+```powershell
+Invoke-WebRequest -Uri "https://github.com/aritro-c/StagPlot/archive/refs/heads/main.zip" -OutFile "main.zip"
+Expand-Archive -Path "main.zip" -Force
+cd StagPlot-main
+python install.py
+```
+
+---
+
+## 🛠️ Manual Installation
+
+If you prefer to set up the environment manually, follow these steps:
+
+### 1. Create a Virtual Environment
+It is highly recommended to use a virtual environment to avoid dependency conflicts.
+
+**Linux & macOS:**
+```bash
+python3 -m venv StagPlot
 ```
 
 **Windows:**
 ```powershell
-Invoke-WebRequest -Uri "https://github.com/aritro-c/StagPlot/archive/refs/heads/main.zip" -OutFile "main.zip"; Expand-Archive -Path "main.zip" -Force; cd main\StagPlot-main; python install.py
+python -m venv StagPlot
 ```
 
-Important for Linux users: If you use VSCode, it is NOT RECCOMMENDED to use the Flatpak/Snap version. Because of it's sandboxed nature it may cause errors finding the proper Python binary. Install VSCode as a system package instead. Check their documentation.
+### 2. Activate the Environment
 
-### Manual Installation
-If you prefer to set it up manually:
-
-### Linux and macOS
-
+**Linux & macOS:**
 ```bash
-# Create a virtual environment
-python3 -m venv myenv
-
-# Activate it
-source myenv/bin/activate
-
-# Install StagPy
-pip install stagpy
-
-# Install Scientific Colourmap by Fabio Crameri (Optional)
-pip install cmcrameri
+source StagPlot/bin/activate
 ```
 
-### Windows
-
+**Windows:**
 ```powershell
-# Create a virtual environment
-python -m venv myenv
-
-# Activate it
-.\myenv\Scripts\activate
-
-# Install StagPy
-pip install stagpy
-
-# Install Scientific Colourmap by Fabio Crameri (Optional)
-pip install cmcrameri
+.\StagPlot\Scripts\activate
 ```
 
-If you are using VSCode, ensure your Python Interpreter is set to the `myenv` you created.
-Press ctrl+shift+p (or type ">" in the search box) and select the Python Interpreter as "myenv".
-
-Now you can run the scrips in VSCode.
-
-### FFmpeg Installation
-
-FFmpeg is used by `field_batch.py` if you want to create a movie of the evolution.
-
-#### Linux (Debain based distros such as Ubuntu)
+### 3. Install Dependencies
 ```bash
-sudo apt update && sudo apt install ffmpeg
+pip install stagpy cmcrameri numpy matplotlib rich
 ```
 
-#### macOS
-```bash
-brew install ffmpeg
-```
+---
 
-#### Windows
-```powershell
-winget install ffmpeg
-```
-*Note: You may need to restart your terminal after installation.*
+## 🎬 FFmpeg Installation (Required for Movies)
 
-## Core Scripts
+FFmpeg is required by `field_batch.py` to stitch individual frames into a movie file.
 
-### 1. `info.py`
-A quick utility to inspect StagYY simulation metadata.
+*   **Linux (Ubuntu/Debian):** `sudo apt update && sudo apt install ffmpeg`
+*   **macOS:** `brew install ffmpeg`
+*   **Windows:** `winget install ffmpeg` (Note: You may need to restart your terminal after installation)
 
-### 2. `field.py`
-Plots a single 2D scalar field for a specific point in time/snapshot.
+---
 
-### 3. `field_batch.py`
-Generates a sequence of frames for 2D fields over a range of time/snapshots and stitch those plots and make a movie (FFmpeg must be installed on your device).
+## 💻 Visual Studio Code Setup
 
-### 4. `rprof.py`
-Plots 1D radial profiles (depth vs. value) for a specific point in time/snapshot.
+If you use VS Code for development:
+1.  Open the `StagPlot-main` folder in VS Code.
+2.  Set the Python Interpreter:
+    *   Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on macOS).
+    *   Type **"Python: Select Interpreter"** and select it.
+    *   Choose the environment you created (e.g., `StagPlot`).
+3.  **Linux Users:** It is **NOT recommended** to use the Flatpak or Snap version of VS Code. Their sandboxed nature often causes issues with finding system Python binaries or virtual environments. Install the official `.deb` or `.rpm` package instead.
 
-### 5. `rprof_time.py`
-Creates a spcetime plot of a radial-profile parameter (Hovmöller diagram).
+---
 
-### 6. `surf2D_time.py`
-Creates spcetime plot of surface parameters (Hovmöller diagram).
+## 📜 Core Scripts
 
-### 7. `time.py`
-Plots the evolution of global diagnostic parameters over time.
+| Script | Description |
+| :--- | :--- |
+| `info.py` | Quickly inspect StagYY simulation metadata. |
+| `field.py` | Plot a single 2D scalar field for a specific snapshot. |
+| `field_batch.py` | Generate 2D field frames over a range of snapshots and stitch them into a movie. |
+| `rprof.py` | Plot 1D radial profiles (depth vs. value) for a specific snapshot. |
+| `rprof_time.py` | Create a spacetime plot (Hovmöller diagram) of a radial-profile parameter. |
+| `surf2D_time.py` | Create a spacetime plot (Hovmöller diagram) of surface parameters. |
+| `time.py` | Plot the evolution of global diagnostic parameters over time. |
+| `tseries_export.py`| Extract multiple time-series fields and export them to a structured text file. |
 
-## Reference
+---
 
-For more details on the physics and parameters being plotted, refer to the **StagYY User Guide** and the **StagPy Documentation**.
+## 📚 References
+
+*   [StagPy Documentation](https://stagpy.readthedocs.io/) - The backend library for data access.
+*   [StagYY User Guide](https://www.ethz.ch/content/dam/ethz/special-interest/erdw/geophysics-dam/groups/pgp/Software/StagYY_Manual.pdf) - Information on StagYY physics and parameters.
