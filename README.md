@@ -103,4 +103,4 @@ If you use VS Code for development:
 ## 📚 References
 
 *   [StagPy Documentation](https://stagpy.readthedocs.io/) - The backend library for data access.
-*   [StagYY User Guide](https://www.ethz.ch/content/dam/ethz/special-interest/erdw/geophysics-dam/groups/pgp/Software/StagYY_Manual.pdf) - Information on StagYY physics and parameters.
+*   [StagYY User Guide] - Information on StagYY physics and parameters.
