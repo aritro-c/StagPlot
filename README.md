@@ -68,6 +68,8 @@ pip install stagpy cmcrameri numpy matplotlib rich
 FFmpeg is required by `field_batch.py` to stitch individual frames into a movie file.
 
 *   **Linux (Ubuntu/Debian):** `sudo apt update && sudo apt install ffmpeg`
+*   **Linux (Fedora/RHEL):** `sudo dnf install ffmpeg`
+*   **Linux (Arch Linux):** You're on your own. Good luck ;)
 *   **macOS:** `brew install ffmpeg`
 *   **Windows:** `winget install ffmpeg` (Note: You may need to restart your terminal after installation)
 
