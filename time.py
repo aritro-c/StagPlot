@@ -6,6 +6,8 @@ from matplotlib.ticker import LogFormatterSciNotation
 # StagPy is the primary library for handling StagYY output
 from stagpy.stagyydata import StagyyData
 from stagpy import phyvars
+from stagpy.error import MissingDataError
+from stagpy.datatypes import Tseries, Vart
 from rich.console import Console
 
 """
@@ -56,24 +58,24 @@ CORE & GEOMETRY:
 # Note: 'color' can be a name (e.g., 'red'), None, or "none" to use Crameri's colourmaps.
 RUN_CONFIG = {
   
-    "HDF": {
-        "path": "/home/aritro/Documents/Academia/#PhD/StagYY/archive_runs/hdf/archive/hdf/",
+    "Lipwig": {
+        "path": "/run/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/archive_runs/lipwig/v_i_SCLD/archive/",
         "style": "-",     
         "color": "red"     
-    #},
-      #"Scaled (Festus)": {
-        #"path": "/run/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/archive_runs/lipwig/v_atm_01/archive/",
-        #"style": "--",      
-        #"color": "orange"    
-    #},
-     #"Scaled (Lipwig)": {
-      #  "path": "/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/runs/lipwig/v_i_SCLD/archive/",
-      #  "style": "--",      
-      #  "color": "blue"    
+    },
+      "Festus1": {
+        "path": "/run/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/archive_runs/festus/venus_i_02/archive/",
+        "style": "--",      
+        "color": "orange"    
+    },
+     "Festus2": {
+        "path": "/run/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/archive_runs/festus/venus_01/archive/",
+        "style": "--",      
+        "color": "blue"    
     },
 }
 
-field_to_plot = "mobility" 
+field_to_plot = "Tmean" 
 
 # --- EXPORT SETTINGS ---
 EXPORT_SVG = False  # Set to True to also save as .svg
@@ -81,7 +83,7 @@ TRANSPARENT_PNG = False  # Set to True for transparent PNG background
 
 # --- AXIS LIMITS ---
 # Set X_LIMITS to (min, max) in Gyr, or None for automatic scaling
-X_LIMITS = None 
+X_LIMITS = (None) 
 
 # MANUAL Y-AXIS LIMITS:
 # Add fields here to force specific Y-axis ranges (min, max).
@@ -171,7 +173,28 @@ def main():
                     # 2. Load Data and Access Field
                     sdata = StagyyData(run_path)
                     
-                    ts_data = sdata.tseries[field_to_plot]
+                    if field_to_plot == "mobility":
+                        # Custom mobility calculation to handle missing time series entries
+                        # (e.g., due to restarts or interleaved time.dat files)
+                        times = []
+                        mobs = []
+                        for step in sdata.steps.filter(rprofs=True):
+                            try:
+                                tinfo = step.timeinfo
+                                # mobility = vsurf / vrms_vol
+                                # vrms from rprof is at each depth; values[-1] is at the surface
+                                mobs.append(step.rprofs["vrms"].values[-1] / tinfo["Vrms"])
+                                times.append(tinfo["time"])
+                            except MissingDataError:
+                                continue
+                        
+                        if len(times) == 0:
+                            console.print(f"   [bold yellow][!] WARNING:[/bold yellow] No valid mobility data for [yellow]{run_label}[/yellow]")
+                            continue
+                            
+                        ts_data = Tseries(np.array(mobs), np.array(times), Vart("Plates mobility", "Mobility", "1"))
+                    else:
+                        ts_data = sdata.tseries[field_to_plot]
                     
                     # 3. Extract and Scale
                     time_gyr = ts_data.time / SECONDS_IN_GYR 
