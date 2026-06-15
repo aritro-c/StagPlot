@@ -104,4 +104,4 @@ If you use VS Code for development:
 
 ## 📚 References
 
-*   [StagPy Documentation](https://stagpy.readthedocs.io/) - The backend library for data access.
+*   [StagPy Documentation](https://stagpython.github.io/StagPy/) - The backend library for data access.
