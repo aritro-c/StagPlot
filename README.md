@@ -1,6 +1,6 @@
 # StagPlot
 
-StagPlot is a suite of Python scripts designed for post-processing and visualizing output from **StagYY**, a numerical mantle convection code. It uses the [StagPy](https://stagpy.readthedocs.io/) library as a backend to interface with simulation data.
+StagPlot is a suite of Python scripts designed for post-processing and visualizing output from **StagYY**, a numerical mantle convection code. It uses the [StagPy](https://stagpython.github.io/StagPy/) library as a backend to interface with simulation data.
 
 ---
 
