@@ -83,7 +83,7 @@ If you use VS Code for development:
     *   Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on macOS).
     *   Type **"Python: Select Interpreter"** and select it.
     *   Choose the environment you created (e.g., `StagPlot`).
-3.  **Linux Users:** It is **NOT recommended** to use the Flatpak or Snap version of VS Code. Their sandboxed nature often causes issues with finding system Python binaries or virtual environments. Install the official `.deb` or `.rpm` package instead.
+3.  **Linux Users:** It is **NOT recommended** to use the Flatpak or Snap version of VS Code. Their sandboxed nature often causes issues with finding system Python binaries or virtual environments. Use the system package manager instead (`apt` for Ubuntu/Debian and `dnf` for Fedora/RHEL; Arch users can do it on their own :) )
 
 ---
 
