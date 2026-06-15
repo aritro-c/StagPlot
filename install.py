@@ -3,36 +3,72 @@ import subprocess
 import sys
 import platform
 
-def run_command(command):
-    """Run a command and handle errors."""
+# ANSI Color Codes
+class Colors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+def print_status(message):
+    print(f"{Colors.OKBLUE}[*]{Colors.ENDC} {message}")
+
+def print_success(message):
+    print(f"{Colors.OKGREEN}[✓]{Colors.ENDC} {message}")
+
+def print_warning(message):
+    print(f"{Colors.WARNING}[!]{Colors.ENDC} {message}")
+
+def print_error(message):
+    print(f"{Colors.FAIL}[✗] ERROR:{Colors.ENDC} {message}")
+
+def run_command(command, description=None):
+    """Run a command and handle errors with better feedback."""
+    if description:
+        print_status(f"{description}...")
+    
     try:
+        # We don't capture output here so the user can see progress (e.g. pip installing)
         subprocess.check_call(command)
-    except subprocess.CalledProcessError as e:
-        print(f"\n[ERROR] Command failed: {' '.join(command)}")
+        if description:
+            print_success(f"{description} successfully.")
+    except subprocess.CalledProcessError:
+        print("\n" + "="*50)
+        print_error(f"Command failed: {' '.join(command)}")
+        print("Please check the output above for details.")
+        print("="*50 + "\n")
         sys.exit(1)
     except FileNotFoundError:
-        print(f"\n[ERROR] Command not found: {command[0]}")
+        print_error(f"Command not found: {command[0]}")
         sys.exit(1)
 
 def main():
-    # 0. Check Python version (f-strings require 3.6+)
+    # 0. Check Python version
     if sys.version_info < (3, 6):
-        print("[ERROR] StagPlot requires Python 3.6 or newer.")
+        print_error("StagPlot requires Python 3.6 or newer.")
         print(f"Current version: {sys.version}")
         sys.exit(1)
 
-    print("========================================")
-    print("     StagPlot Installation Script       ")
-    print("========================================")
+    print(f"{Colors.HEADER}{Colors.BOLD}")
+    print("==================================================")
+    print("         StagPlot Installation Script             ")
+    print("==================================================")
+    print(f"{Colors.ENDC}")
 
     # Prompt user for StagPy version
-    print("\nWhich version of StagPy would you like to install?")
-    print("1: Release version (stable, via PyPI)")
-    print("2: Development version (latest, via GitHub)")
+    print(f"{Colors.BOLD}Configure Installation:{Colors.ENDC}")
+    print("Which version of StagPy would you like to install?")
+    print("  1: Release version (stable, via PyPI)")
+    print("  2: Development version (latest, via GitHub)")
     
     choice = ""
     while choice not in ['1', '2']:
-        choice = input("Enter 1 or 2 [default: 1]: ").strip()
+        choice = input(f"\n{Colors.OKCYAN}Enter 1 or 2 [default: 1]: {Colors.ENDC}").strip()
         if not choice:
             choice = '1'
 
@@ -41,8 +77,7 @@ def main():
     
     # 1. Create virtual environment
     venv_name = "StagPlot"
-    print(f"\n[*] Creating virtual environment: {venv_name}...")
-    run_command([sys.executable, "-m", "venv", venv_name])
+    run_command([sys.executable, "-m", "venv", venv_name], f"Creating virtual environment: {venv_name}")
     
     # 2. Determine paths and OS label
     os_name = platform.system()
@@ -58,43 +93,52 @@ def main():
         system_label = "Linux/macOS"
         
     # 3. Install/Upgrade pip
-    print("[*] Upgrading pip...")
-    run_command([python_path, "-m", "pip", "install", "--upgrade", "pip"])
+    run_command([python_path, "-m", "pip", "install", "--upgrade", "pip"], "Upgrading pip")
     
     # 4. Install dependencies
     stagpy_dep = "git+https://github.com/StagPython/StagPy.git" if is_dev else "stagpy"
     dependencies = [stagpy_dep, "cmcrameri", "numpy", "matplotlib"]
-    print(f"[*] Installing dependencies: {', '.join(dependencies)}...")
-    run_command([pip_path, "install"] + dependencies)
+    run_command([pip_path, "install"] + dependencies, f"Installing dependencies: {', '.join(dependencies)}")
     
     # 5. Check for FFmpeg
-    print("\n[*] Checking for FFmpeg...")
+    print_status("Checking for FFmpeg...")
     try:
-        subprocess.check_call(["ffmpeg", "-version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        print("[+] FFmpeg is already installed and available in PATH.")
+        subprocess.run(["ffmpeg", "-version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+        print_success("FFmpeg is already installed and available in PATH.")
     except (subprocess.CalledProcessError, FileNotFoundError):
-        print("[-] FFmpeg NOT found. It is required for 'field_batch.py' animations.")
-        print("    Please install it using the following command:")
+        print_warning("FFmpeg NOT found. It is required for 'field_batch.py' animations.")
+        print(f"    {Colors.BOLD}Recommendation:{Colors.ENDC} Please install it using:")
         if os_name == "Linux":
-            print("    sudo apt update && sudo apt install ffmpeg")
+            print(f"    {Colors.OKCYAN}sudo apt update && sudo apt install ffmpeg{Colors.ENDC}")
         elif os_name == "Darwin": # macOS
-            print("    brew install ffmpeg")
+            print(f"    {Colors.OKCYAN}brew install ffmpeg{Colors.ENDC}")
         elif os_name == "Windows":
-            print("    winget install ffmpeg")
+            print(f"    {Colors.OKCYAN}winget install ffmpeg{Colors.ENDC}")
 
     # 6. Final Instructions
-    print("\n" + "="*40)
-    print("      INSTALLATION SUCCESSFUL!          ")
-    print("="*40)
-    print(f"\nDetected OS: {system_label}")
-    print(f"StagPy Version Installed: {stagpy_version_label}")
-    print(f"  ")
-    print(f"Open VScode in the current directory and ensure your Python Interpreter is set to '{venv_name}' (VSCode should automatically detect that). Now you can start using StagPlot. Enjoy ;)")
-    print(f"  ")
-    print(f"You can also use StagPlot directly from command line. Just activate your environment first:")
-    print(f"\n    {activate_cmd}")
+    print(f"\n{Colors.OKGREEN}{Colors.BOLD}" + "="*50)
+    print("          INSTALLATION SUCCESSFUL!            ")
+    print("="*50 + f"{Colors.ENDC}")
+    
+    print(f"\n{Colors.BOLD}Summary:{Colors.ENDC}")
+    print(f"  - Detected OS: {Colors.OKCYAN}{system_label}{Colors.ENDC}")
+    print(f"  - StagPy Version: {Colors.OKCYAN}{stagpy_version_label}{Colors.ENDC}")
+    print(f"  - Environment: {Colors.OKCYAN}{venv_name}{Colors.ENDC}")
+    
+    print(f"\n{Colors.BOLD}Next Steps:{Colors.ENDC}")
+    print(f"  1. Open VS Code in this directory.")
+    print(f"  2. Ensure your Python Interpreter is set to {Colors.OKGREEN}'{venv_name}'{Colors.ENDC}.")
+    print(f"     (VS Code usually detects this automatically).")
+    
+    print(f"\n  To use StagPlot from the command line, activate the environment:")
+    print(f"  {Colors.BOLD}{Colors.OKGREEN}{activate_cmd}{Colors.ENDC}")
  
-    print("="*40)
+    print(f"\n{Colors.HEADER}{Colors.BOLD}Enjoy using StagPlot! ;){Colors.ENDC}")
+    print(f"{Colors.HEADER}{Colors.BOLD}" + "="*50 + f"{Colors.ENDC}")
 
 if __name__ == "__main__":
+    # Support for Windows ANSI color support
+    if platform.system() == "Windows":
+        os.system('color')
+    
     main()
