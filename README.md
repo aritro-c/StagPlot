@@ -103,4 +103,3 @@ If you use VS Code for development:
 ## 📚 References
 
 *   [StagPy Documentation](https://stagpy.readthedocs.io/) - The backend library for data access.
-*   [StagYY User Guide] - Information on StagYY physics and parameters.
