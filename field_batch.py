@@ -95,7 +95,7 @@ with console.status("[bold green]Initializing StagyyData...", spinner="dots"):
 folder_name = data_path.parent.name 
 
 try:
-    field_name_display = phyvars.FIELD[field_to_plot].description
+    field_name_display = phyvars.FIELD.variables[field_to_plot].description
 except KeyError:
     field_name_display = field_to_plot
 
@@ -211,10 +211,11 @@ with console.status("[bold green]Rendering frames...", spinner="dots") as status
                                                          vmin=f_min, vmax=f_max)
             
             # Colorbar labels
-            unit = snapshot.fields[field_to_plot].meta.dim
             try:
-                display_name = phyvars.FIELD[field_to_plot].description
+                unit = phyvars.FIELD.variables[field_to_plot].dim
+                display_name = phyvars.FIELD.variables[field_to_plot].description
             except KeyError:
+                unit = "1"
                 display_name = field_to_plot
             cbar.set_label(f"{display_name} [{unit}]", size=18)
             cbar.ax.tick_params(labelsize=14)
