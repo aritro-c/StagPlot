@@ -39,17 +39,17 @@ NUMERICS:
 
 # --- USER INPUT ---
 # NOTE: Update this path to your StagYY archive directory
-data_path = Path("/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/runs/euler/venus_i_01/archive/")
+data_path = Path("/run/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/archive_runs/euler/venus_i_01/archive/")
 
-plot_mode = "snapshot"   # Set to "time" or "snapshot" 
-target_time_Myr = 450    # Used if plot_mode is "time"
+plot_mode = "time"   # Set to "time" or "snapshot" 
+target_time_Myr = 4500   # Used if plot_mode is "time"
 target_snapshot = 500  # Used if plot_mode is "snapshot"
 
 field_to_plot = "eta"    
 
 # --- EXPORT SETTINGS ---
-EXPORT_SVG = False  # Set to True to also save as .svg
-TRANSPARENT_PNG = True  # Set to True for transparent PNG background
+EXPORT_SVG = True  # Set to True to also save as .svg
+TRANSPARENT_PNG = False  # Set to True for transparent PNG background
 
 # --- CONFIGURATION ---
 # Auto-detect log scale for these fields
@@ -80,7 +80,7 @@ SEC_PER_MYR = 1e6 * 365.25 * 24 * 3600
 SEC_PER_GYR = 1e3 * SEC_PER_MYR
 
 try:
-    field_name_display = phyvars.FIELD[field_to_plot].description
+    field_name_display = phyvars.FIELD.variables[field_to_plot].description
 except KeyError:
     field_name_display = field_to_plot
 
@@ -149,10 +149,11 @@ if snap_number is not None:
                 fig, ax, mesh, cbar = sp_field.plot_scalar(snapshot, field_to_plot, vmin=f_min, vmax=f_max)
             
             # Visual Styling
-            unit = snapshot.fields[field_to_plot].meta.dim
             try:
-                label = phyvars.FIELD[field_to_plot].description
+                unit = phyvars.FIELD.variables[field_to_plot].dim
+                label = phyvars.FIELD.variables[field_to_plot].description
             except KeyError:
+                unit = "1"
                 label = field_to_plot
             cbar.set_label(f"{label} [{unit}]", size=18)
             cbar.ax.tick_params(labelsize=14)
