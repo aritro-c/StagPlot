@@ -58,39 +58,41 @@ CORE & GEOMETRY:
 # Note: 'color' can be a name (e.g., 'red'), None, or "none" to use Crameri's colourmaps.
 RUN_CONFIG = {
   
-    "Lipwig": {
-        "path": "/run/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/archive_runs/lipwig/v_i_SCLD/archive/",
+    "With LA": {
+        "path": "/run/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/archive_runs/euler/venus_i_01/archive/",
         "style": "-",     
         "color": "red"     
     },
-      "Festus1": {
-        "path": "/run/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/archive_runs/festus/venus_i_02/archive/",
-        "style": "--",      
-        "color": "orange"    
-    },
-     "Festus2": {
+      "Without LA": {
         "path": "/run/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/archive_runs/festus/venus_01/archive/",
         "style": "--",      
         "color": "blue"    
     },
+     #"Festus2": {
+       # "path": "/run/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/archive_runs/festus/venus_01/archive/",
+       # "style": "--",      
+       # "color": "blue"    
+   # },
 }
 
-field_to_plot = "Tmean" 
+field_to_plot = "F_mean" 
 
 # --- EXPORT SETTINGS ---
 EXPORT_SVG = False  # Set to True to also save as .svg
 TRANSPARENT_PNG = False  # Set to True for transparent PNG background
+FIG_WIDTH = 11      # Figure width in inches
+FIG_HEIGHT = 5     # Figure height in inches
 
 # --- AXIS LIMITS ---
-# Set X_LIMITS to (min, max) in Gyr, or None for automatic scaling
-X_LIMITS = (None) 
+# Set X_LIMITS to (min, max) in Myr, or None for automatic scaling
+X_LIMITS = (-2, 350) 
 
 # MANUAL Y-AXIS LIMITS:
 # Add fields here to force specific Y-axis ranges (min, max).
 FIELD_LIMITS = {
     #"Tmean": (500, 4000),
     #"Vrms": (1e-8, 1e-2),
-    "F_mean": (0, 0.5),
+    #"F_mean": (0, 0.1),
     "eta_max": (1e21, 1e27),
 }
 
@@ -100,7 +102,7 @@ SEQUENTIAL_MAP = "roma"
 DIVERGING_MAP  = "nuuk"
 
 # --- 3. CONSTANTS ---
-SECONDS_IN_GYR = 3.15576e7 * 1e9
+SECONDS_IN_MYR = 3.15576e7 * 1e6
 
 # Try to import Fabio Crameri's colormaps; fallback if not installed
 try:
@@ -132,7 +134,7 @@ def main():
 
     try:
         # Initialize Figure
-        fig, ax = plt.subplots(figsize=(9, 5)) 
+        fig, ax = plt.subplots(figsize=(FIG_WIDTH, FIG_HEIGHT)) 
         labels_set = False
         
         # Determine if we should use a diverging color map
@@ -197,7 +199,7 @@ def main():
                         ts_data = sdata.tseries[field_to_plot]
                     
                     # 3. Extract and Scale
-                    time_gyr = ts_data.time / SECONDS_IN_GYR 
+                    time_myr = ts_data.time / SECONDS_IN_MYR 
                     values = ts_data.values
 
                     # 4. Plotting
@@ -207,7 +209,7 @@ def main():
                     else:
                         plot_color = cfg["color"]
 
-                    ax.plot(time_gyr, values, 
+                    ax.plot(time_myr, values, 
                             label=run_label, 
                             linewidth=1.8, 
                             linestyle=cfg["style"], 
@@ -226,7 +228,7 @@ def main():
                         # Clean up unit display: don't show "1" as a unit
                         ylabel = f"{description} [{unit}]" if unit and unit != "1" else description
                         ax.set_ylabel(ylabel, fontsize=14)
-                        ax.set_xlabel("Time [Gyr]", fontsize=16)
+                        ax.set_xlabel("Time [Myr]", fontsize=16)
                         ax.tick_params(axis='both', which='major', labelsize=12)
                         
                         # Logarithmic scale detection
@@ -265,7 +267,7 @@ def main():
         
         plt.tight_layout()
 
-        save_name = f"timeseries_Gyr_{field_to_plot}.png"
+        save_name = f"timeseries_Myr_{field_to_plot}.png"
         fig.savefig(save_name, dpi=300, transparent=TRANSPARENT_PNG)
         
         console.print(f"\n[bold cyan]{'='*60}[/bold cyan]")
