@@ -52,8 +52,10 @@ time_max_Myr = 107     # Used if range_mode is "time"
 # --- EXPORT SETTINGS ---
 EXPORT_SVG = False  # Set to True to also save as .svg
 TRANSPARENT_PNG = False  # Set to True for transparent PNG background
-MAKE_MOVIE = False  # Set to True to generate an MP4 movie using FFmpeg
+MAKE_MOVIE = True   # Set to True to generate an MP4 movie using FFmpeg
 MOVIE_FPS = 20      # Frames per second for the movie
+MOVIE_LENGTH = 10 # Length in seconds. Overrides MOVIE_FPS. Set to None to use MOVIE_FPS.
+VIDEO_QUALITY = "Optimal" # Options: "Lossless", "Optimal", "Potato"
 
 # --- TOGGLE ---
 mode = "constant_time" # Options: "constant_time" or "constant_frame"
@@ -274,16 +276,37 @@ if MAKE_MOVIE:
         console.print(f"    [dim]Missing snaps: {missing_frames[:5]}...[/dim]")
         console.print("    [red]Skipping movie creation as the frame sequence is incomplete.[/red]")
     else:
+        # Determine effective FPS
+        if MOVIE_LENGTH is not None:
+            effective_fps = max(1, round(len(frames_to_render) / MOVIE_LENGTH))
+            actual_length = len(frames_to_render) / effective_fps
+            console.print(f"    [dim]Target length: {MOVIE_LENGTH}s -> Using {effective_fps} FPS (Actual length: {actual_length:.2f}s)[/dim]")
+        else:
+            effective_fps = MOVIE_FPS
+
+        # Calculate base resolution from script settings (dpi=300)
+        base_width = int(fig_width * 300)
+        base_height = int(fig_height * 300)
+        
+        if VIDEO_QUALITY == "Lossless":
+            quality_args = ["-crf", "0", "-preset", "veryslow"]
+            scale_filter = f"scale={base_width}:{base_height}"
+        elif VIDEO_QUALITY == "Potato":
+            quality_args = ["-crf", "35", "-preset", "ultrafast"]
+            scale_filter = f"scale={base_width//2}:{base_height//2}"
+        else: # Optimal
+            quality_args = ["-crf", "25", "-preset", "medium"]
+            scale_filter = f"scale={int(base_width * 0.8)}:{int(base_height * 0.8)}"
+
         cmd = [
             "ffmpeg", "-y",
-            "-framerate", str(MOVIE_FPS),
+            "-framerate", str(effective_fps),
             "-pattern_type", "glob",
             "-i", str(output_dir / "frame_*.png"),
             "-c:v", "libx264",
             "-pix_fmt", "yuv420p",
-            "-vf", "pad=ceil(iw/2)*2:ceil(ih/2)*2",
-            movie_name
-        ]
+            "-vf", f"{scale_filter},pad=ceil(iw/2)*2:ceil(ih/2)*2"
+        ] + quality_args + [movie_name]
         
         try:
             with console.status("[bold green]Running FFmpeg...", spinner="dots"):
