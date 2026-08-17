@@ -39,27 +39,27 @@ NUMERICS:
 """
 
 # --- USER INPUT ---
-data_path = Path("/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/runs/lipwig/v_atm_01/archive")
+data_path = Path("/run/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/archive_runs/euler/venus_i_01/archive/")
 field_to_plot = "T"  
 
 # Range Selection
-range_mode = "time"  # Options: "snapshot" or "time"
+range_mode = "snapshot"  # Options: "snapshot" or "time"
 snap_min = 0         # Used if range_mode is "snapshot"
-snap_max = 50         # Used if range_mode is "snapshot"
-time_min_Myr = 110        # Used if range_mode is "time"
-time_max_Myr = 140     # Used if range_mode is "time"
+snap_max = 200         # Used if range_mode is "snapshot"
+time_min_Myr = 70        # Used if range_mode is "time"
+time_max_Myr = 107     # Used if range_mode is "time"
 
 # --- EXPORT SETTINGS ---
 EXPORT_SVG = False  # Set to True to also save as .svg
 TRANSPARENT_PNG = False  # Set to True for transparent PNG background
-MAKE_MOVIE = True   # Set to True to generate an MP4 movie using FFmpeg
-MOVIE_FPS = 15      # Frames per second for the movie
+MAKE_MOVIE = False  # Set to True to generate an MP4 movie using FFmpeg
+MOVIE_FPS = 20      # Frames per second for the movie
 
 # --- TOGGLE ---
-mode = "constant_frame" # Options: "constant_time" or "constant_frame"
+mode = "constant_time" # Options: "constant_time" or "constant_frame"
 
 # --- CONSTANT_TIME SETTINGS ---
-dt_Myr = 1 # Time step in Myr
+dt_Myr = 0.001 # Time step in Myr
 
 # --- CONSTANT_FRAME SETTINGS ---
 snap_step = 1   # 1 = every snapshot, 10 = every 10th snapshot, etc.
@@ -277,8 +277,8 @@ if MAKE_MOVIE:
         cmd = [
             "ffmpeg", "-y",
             "-framerate", str(MOVIE_FPS),
-            "-start_number", str(start_number),
-            "-i", str(output_dir / "frame_%05d.png"),
+            "-pattern_type", "glob",
+            "-i", str(output_dir / "frame_*.png"),
             "-c:v", "libx264",
             "-pix_fmt", "yuv420p",
             "-vf", "pad=ceil(iw/2)*2:ceil(ih/2)*2",
@@ -289,8 +289,30 @@ if MAKE_MOVIE:
             with console.status("[bold green]Running FFmpeg...", spinner="dots"):
                 result = subprocess.run(cmd, capture_output=True, text=True)
             
+            # Write log to file
+            log_file = "ffmpeg_log.txt"
+            with open(log_file, "w") as f:
+                f.write("--- FFmpeg Command ---\n")
+                f.write(" ".join(cmd) + "\n\n")
+                f.write("--- STDOUT ---\n")
+                f.write(result.stdout)
+                f.write("\n--- STDERR ---\n")
+                f.write(result.stderr)
+            console.print(f"[bold cyan][+][/bold cyan] FFmpeg log written to: [yellow]{log_file}[/yellow]")
+
             if result.returncode == 0:
-                console.print(f"[bold green][SUCCESS][/bold green] Movie created: [yellow]{movie_name}[/yellow]")
+                import re
+                matches = re.findall(r"frame=\s*(\d+)", result.stderr)
+                if matches:
+                    encoded_frames = int(matches[-1])
+                    expected_frames = len(frames_to_render)
+                    if encoded_frames < expected_frames:
+                        console.print(f"[bold red][!] WARNING:[/bold red] FFmpeg exited successfully, but only encoded {encoded_frames} out of {expected_frames} frames!")
+                        console.print("    [dim]Check the ffmpeg_log.txt for details.[/dim]")
+                    else:
+                        console.print(f"[bold green][SUCCESS][/bold green] Movie created: [yellow]{movie_name}[/yellow]")
+                else:
+                    console.print(f"[bold green][SUCCESS][/bold green] Movie created: [yellow]{movie_name}[/yellow]")
             else:
                 console.print(f"[bold red][!] ERROR:[/bold red] FFmpeg failed with return code {result.returncode}")
                 # Provide snippet of FFmpeg error for debugging
