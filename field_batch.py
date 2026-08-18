@@ -38,33 +38,23 @@ NUMERICS:
     rs1, rs2, rs3: Momentum residue rsc: Continuity residue
 """
 
-# --- USER INPUT ---
+# ============================== USER INPUT ========================================
+
 data_path = Path("/run/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/archive_runs/euler/venus_i_01/archive/")
 field_to_plot = "T"  
 
-# Range Selection
-range_mode = "snapshot"  # Options: "snapshot" or "time"
+# --- RANGE SETTINGS ---
+range_mode = "snapshot"  # Options: "snapshot" or "time"; with "snapshot" mode you select your target frame range using snapshot numbers; with "time" mode, you do it with simulation time.
 snap_min = 0         # Used if range_mode is "snapshot"
 snap_max = 300         # Used if range_mode is "snapshot"
 time_min_Myr = 70        # Used if range_mode is "time"
 time_max_Myr = 107     # Used if range_mode is "time"
 
-# --- EXPORT SETTINGS ---
-EXPORT_SVG = False  # Set to True to also save as .svg
-TRANSPARENT_PNG = False  # Set to True for transparent PNG background
-MAKE_MOVIE = True   # Set to True to generate an MP4 movie using FFmpeg
-MOVIE_FPS = 20      # Frames per second for the movie
-MOVIE_LENGTH = 10 # Length in seconds. Overrides MOVIE_FPS. Set to None to use MOVIE_FPS.
-VIDEO_QUALITY = "Optimal" # Options: "Lossless", "Optimal", "Potato"
-
-# --- TOGGLE ---
+# --- RENDER SETTINGS ---
 mode = "constant_time" # Options: "constant_time" or "constant_frame"
+dt_Myr = 0.001 # Time step in Myr, used for "constant_time"
+snap_step = 1   # 1 = every snapshot, 10 = every 10th snapshot, etc., used for "constant_frame"
 
-# --- CONSTANT_TIME SETTINGS ---
-dt_Myr = 0.001 # Time step in Myr
-
-# --- CONSTANT_FRAME SETTINGS ---
-snap_step = 1   # 1 = every snapshot, 10 = every 10th snapshot, etc.
 
 # --- CONFIGURATION ---
 # Auto-detect log scale for these fields
@@ -79,9 +69,20 @@ FIELD_LIMITS = {
     "meltfrac": (0.0, 0.2),
 }
 
-# --- PLOT SETTINGS ---
+# --- EXPORT SETTINGS ---
+EXPORT_SVG = False  # Set to True to also save as .svg
+TRANSPARENT_PNG = False  # Set to True for transparent PNG background
+MAKE_MOVIE = True   # Set to True to generate an MP4 movie using FFmpeg
+MOVIE_FPS = 20      # Frames per second for the movie
+MOVIE_LENGTH = 10   # in seconds. If this has some value, the script calculates FPS automatically and overrides MOVIE_FPS. Set to None to use MOVIE_FPS.
+VIDEO_QUALITY = "Optimal" # Options: "Lossless", "Optimal", "Potato"
 fig_width = 8
 fig_height = 6
+
+
+
+# ===========================USER EDITS NOTHING BELOW ==============================
+
 
 # --- 0. STARTUP ---
 console.print(f"[bold cyan]{'='*60}[/bold cyan]")
