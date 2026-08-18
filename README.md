@@ -4,6 +4,22 @@ StagPlot is a suite of Python scripts designed for post-processing and visualizi
 
 ---
 
+## 📜 Core Scripts
+
+| Script | Description |
+| :--- | :--- |
+| `info.py` | Quickly inspect StagYY simulation metadata. |
+| `field.py` | Plot a single 2D scalar field for a specific snapshot. |
+| `field_batch.py` | Generate 2D field frames over a range of snapshots and stitch them into a movie. |
+| `rprof.py` | Plot 1D radial profiles (depth vs. value) for a specific snapshot. |
+| `rprof_time.py` | Create a spacetime plot (Hovmöller diagram) of a radial-profile parameter. |
+| `surf2D_time.py` | Create a spacetime plot (Hovmöller diagram) of surface parameters. |
+| `time.py` | Plot the evolution of global diagnostic parameters over time. |
+| `tseries_export.py`| Extract multiple time-series fields and export them to a structured text file. |
+| `movie.py` | A cross-platform utility to stitch a directory of PNG frames into an MP4 movie. |
+
+---
+
 ## 🚀 Quick Start (Automated Installation)
 
 The easiest way to get started is to use the automated installation script. This will download the latest version, create a virtual environment, and install all necessary dependencies.
@@ -86,22 +102,6 @@ If you use VS Code for development:
     *   Choose the environment you created (e.g., `StagPlot`).
 
 **Linux Users:** It is **NOT recommended** to use the Flatpak or Snap version of VS Code. Their sandboxed nature often causes issues with finding system Python binaries or virtual environments. Use the system package manager instead (`apt` for Ubuntu/Debian and `dnf` for Fedora/RHEL; Arch users can do it on their own :) )
-
----
-
-## 📜 Core Scripts
-
-| Script | Description |
-| :--- | :--- |
-| `info.py` | Quickly inspect StagYY simulation metadata. |
-| `field.py` | Plot a single 2D scalar field for a specific snapshot. |
-| `field_batch.py` | Generate 2D field frames over a range of snapshots and stitch them into a movie. |
-| `rprof.py` | Plot 1D radial profiles (depth vs. value) for a specific snapshot. |
-| `rprof_time.py` | Create a spacetime plot (Hovmöller diagram) of a radial-profile parameter. |
-| `surf2D_time.py` | Create a spacetime plot (Hovmöller diagram) of surface parameters. |
-| `time.py` | Plot the evolution of global diagnostic parameters over time. |
-| `tseries_export.py`| Extract multiple time-series fields and export them to a structured text file. |
-| `movie.py` | A cross-platform utility to stitch a directory of PNG frames into an MP4 movie. |
 
 ---
 
