@@ -22,7 +22,7 @@ StagPlot is a suite of Python scripts designed for post-processing and visualizi
 
 ## 🚀 Quick Start (Automated Installation)
 
-The easiest way to get started is to use the automated installation script. This will download the latest version, create a virtual environment, and install all necessary dependencies.
+The easiest way to get started is to use the automated installation script. This will download the latest version, create a virtual environment, and install all necessary dependencies in your current directory.
 
 ### Linux & macOS
 ```bash
