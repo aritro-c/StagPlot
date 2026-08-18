@@ -2,14 +2,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 from pathlib import Path
 from matplotlib.ticker import LogFormatterSciNotation
-
-# StagPy is the primary library for handling StagYY output
 from stagpy.stagyydata import StagyyData
-
 from rich.console import Console
 console = Console()
 
-# --- 1. CONSTANTS & COMPATIBILITY ---
 SECONDS_IN_YEAR = 3.15576e7
 YEARS_IN_MYR = 1e6
 
@@ -20,42 +16,6 @@ try:
 except ImportError:
     HAS_CRAMERI = False
 
-# --- 2. CONFIGURATION ---
-# MODE: "SNAPSHOTS" (Compare different times in ONE run) 
-#       "RUNS" (Compare the same time/snapshot across MULTIPLE runs)
-PLOT_MODE = "RUNS" 
-
-# TIME SELECTION:
-# If TIME_TARGETS has values, the script ignores 'snapshot_list' and finds 
-# the closest available data to these specific times (in Myr).
-TIME_TARGETS = [2] # [1, 2, 3]
-snapshot_list = [1400] # [1400, 1500] Fallback if TIME_TARGETS is empty
-
-# DATA SOURCE:
-# Provide a label and the system path to the StagYY output directory.
-RUN_PATHS = {
-    "Venus_Imp6": "/run/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/archive_runs/euler/i3D_02/archive/",
-   # "Venus_Imp5": "/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/runs/festus/venus_imp5/archive/", 
-}
-
-# PLOT SETTINGS:
-field_to_plot = "Tmean"  # Choose from the ALL_RPROF_FIELDS list below
-
-# --- EXPORT SETTINGS ---
-EXPORT_SVG = False  # Set to True to also save as .svg
-TRANSPARENT_PNG = True  # Set to True for transparent PNG background
-
-# MANUAL AXIS LIMITS:
-FIELD_LIMITS = {
-    "etalog": (1e18, 1e22), 
-    "vrms": (1e-8, 1e-2),   
-    "fmeltmean": (0, 1),
-}
-
-# VISUAL STYLING:
-LINE_STYLES = ["-", "--", "-.", ":"]
-USE_CRAMERI = True
-CRAMERI_MAP = "nuuk"
 
 """
 --- REFERENCE: ALL AVAILABLE RPROF FIELDS ---
@@ -91,7 +51,53 @@ COMPOSITION, MELT, & MINERALOGY:
     gsmean/gsmin/gsmax: Grain size
 """
 
-# --- 4. HELPER FUNCTIONS ---
+
+
+
+# ============================= USER INPUT ======================================
+
+# DATA SOURCE:
+# Provide a label and the system path to the StagYY output directory.
+RUN_PATHS = {
+    "Venus_Imp6": "/run/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/archive_runs/euler/i3D_02/archive/",
+   # "Venus_Imp5": "/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/runs/festus/venus_imp5/archive/", 
+}
+# FIELD:
+field_to_plot = "Tmean"  # Choose from the ALL_RPROF_FIELDS list below
+
+# MODE: "SNAPSHOTS" (Compare different times in ONE run) 
+#       "RUNS" (Compare the same time/snapshot across MULTIPLE runs)
+PLOT_MODE = "RUNS" 
+
+# TIME SELECTION:
+# If TIME_TARGETS has values, the script ignores 'snapshot_list' and finds 
+# the closest available data to these specific times (in Myr).
+TIME_TARGETS = [2] # [1, 2, 3]
+snapshot_list = [1400] # [1400, 1500] Fallback if TIME_TARGETS is empty
+
+# --- EXPORT SETTINGS ---
+EXPORT_SVG = False  # Set to True to also save as .svg
+TRANSPARENT_PNG = True  # Set to True for transparent PNG background
+
+# MANUAL AXIS LIMITS:
+FIELD_LIMITS = {
+    "etalog": (1e18, 1e22), 
+    "vrms": (1e-8, 1e-2),   
+    "fmeltmean": (0, 1),
+}
+
+# VISUAL STYLING:
+LINE_STYLES = ["-", "--", "-.", ":"]
+USE_CRAMERI = True
+CRAMERI_MAP = "nuuk"
+
+# ======================== USER EDITS NOTHING BELOW ============================
+
+
+
+
+
+# ---  HELPER FUNCTIONS ---
 
 def find_closest_snap(sdata, target_myr):
     """Finds integer snapshot index closest to target time in Myr."""
@@ -105,7 +111,7 @@ def find_closest_snap(sdata, target_myr):
         console.print(f"   [bold red][!][/bold red] Error mapping time {target_myr} Myr to a snapshot: {e}")
         return None
 
-# --- 5. MAIN EXECUTION BLOCK ---
+# --- MAIN EXECUTION BLOCK ---
 
 def main():
     console.print(f"[bold cyan]{'='*60}[/bold cyan]")
