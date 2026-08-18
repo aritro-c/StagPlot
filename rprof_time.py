@@ -60,10 +60,10 @@ COMPOSITION, MELT, & MINERALOGY:
 DATA_ROOT = Path("/run/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/archive_runs/euler/venus_i_01/archive/")
 
 # FIELD (Y-axis = Depth, X-axis = Time, Color = Field Value)
-FIELDS_TO_PLOT = ["vrms"]   # ["Tmean", "fmeltmax", "elog"]
+FIELDS_TO_PLOT = ["vrms"]   # e.g., ["Tmean", "fmeltmax", "elog"]
 
 # Time Range in Myr 
-TIME_RANGE = (0, 400) # e.g., (0, 1000) or None for all
+TIME_RANGE = (0, 400)       # e.g., (0, 1000) or None for all
 
 # --- EXPORT SETTINGS ---
 EXPORT_SVG = False  # Set to True to also save as .svg
