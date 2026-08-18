@@ -8,12 +8,15 @@ from rich.console import Console
 console = Console()
 
 def main():
-    # --- SETTINGS ---
-    INPUT_DIRECTORY = "/home/aritro/Documents/Academia/PhD/post_processing/stagpy/StagPlot-main/venus_i_01_frames_T_constant_time/"       # Directory containing the .png files
+    # ===================================== USER INPUT =======================================================
+    
+    INPUT_DIRECTORY = "/home/aritro/Documents/Academia/PhD/post_processing/stagpy/StagPlot-main/venus_i_01_frames_T_constant_time/"  # Directory containing the .png files
     MOVIE_FPS = 20
-    MOVIE_LENGTH = None         # Length in seconds. Overrides MOVIE_FPS. Set to None to use MOVIE_FPS.
+    MOVIE_LENGTH = None         # in seconds. If this has some value, the script calculates FPS automatically and overrides MOVIE_FPS. Set to "None" to use MOVIE_FPS.
     VIDEO_QUALITY = "Optimal"   # Options: Lossless, Optimal, Potato
     OUTPUT_FILE = "T_test.mp4"
+
+    # =============================== USER EDITS NOTHING BELOW ===============================================
 
     console.print(f"[bold cyan]{'='*60}[/bold cyan]")
     console.print(f"[bold cyan]             MOVIE CREATION SCRIPT             [/bold cyan]")
