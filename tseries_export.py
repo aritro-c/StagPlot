@@ -11,15 +11,21 @@ and saves them to a structured text file.
 Columns: Snapshot (istep), Time (Years), Field1, Field2, ...
 """
 
-# --- CONFIGURATION ---
+
+# ========================= USER INPUT ==================================
+
 # Update this path to your StagYY archive directory
 DATA_PATH = Path("/run/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/archive_runs/euler/i3D_02/archive/")
 
 # List of parameters to extract, separated by commas (e.g., "Tmean, Vrms, erupt_rate")
 FIELDS_TO_EXPORT = "Tmean, Vrms, eta_amean, outgassed_nitrogen"
 
-SECONDS_IN_YEAR = 3.15576e7
+# ==================== USER EDITS NOTHING BELOW =========================
 
+
+
+
+SECONDS_IN_YEAR = 3.15576e7
 
 def main():
     console = Console()
