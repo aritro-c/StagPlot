@@ -37,7 +37,12 @@ NUMERICS:
     rs1, rs2, rs3: Momentum residue rsc: Continuity residue
 """
 
-# --- USER INPUT ---
+
+
+
+
+# ======================================= USER INPUT =================================================
+
 # NOTE: Update this path to your StagYY archive directory
 data_path = Path("/run/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/archive_runs/euler/venus_i_01/archive/")
 
@@ -63,6 +68,9 @@ FIELD_LIMITS = {
     "edot": (1e-18, 1e-12),
     "meltfrac": (0.0, 0.2),
 }
+# ================================ USER EDITS NOTHING BELOW ============================================
+
+
 
 # --- 0. STARTUP ---
 console.print(f"[bold cyan]{'='*60}[/bold cyan]")
