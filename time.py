@@ -52,7 +52,7 @@ CORE & GEOMETRY:
     Psurf: Ground pressure
 """
 
-# --- 1. CONFIGURATION ---
+# ======================== USER INPUT ===============================
 
 # Define your runs, their system paths, and visual styles here.
 # Note: 'color' can be a name (e.g., 'red'), None, or "none" to use Crameri's colourmaps.
@@ -101,7 +101,14 @@ USE_CRAMERI = False
 SEQUENTIAL_MAP = "roma"
 DIVERGING_MAP  = "nuuk"
 
-# --- 3. CONSTANTS ---
+
+# ==================== USER EDITS NOTHING BELOW =========================
+
+
+
+
+
+# ---  CONSTANTS ---
 SECONDS_IN_MYR = 3.15576e7 * 1e6
 
 # Try to import Fabio Crameri's colormaps; fallback if not installed
@@ -113,7 +120,7 @@ except ImportError:
 
 console = Console()
 
-# --- 4. MAIN EXECUTION ---
+# ---  MAIN EXECUTION ---
 
 def main():
     console.print(f"[bold cyan]{'='*60}[/bold cyan]")
