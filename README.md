@@ -20,8 +20,9 @@ StagPlot is a suite of Python scripts designed for post-processing and visualizi
 
 ---
 
-## 🖥️ System Requirements
+## 🖥️ Requirements
 
+- **StagYY:** Version 1.2.7 or newer.
 - **Python:** Version 3.8 or newer is highly recommended. (Python 3.6 is the absolute minimum, but older versions may fail to build modern dependency wheels).
 - **Linux & macOS:** Fully supported out-of-the-box on virtually all distributions.
 - **Windows:** Windows 10 (Build 17063+ from April 2018) or Windows 11 is required to use the automated quick-start script. Older versions must download and extract the ZIP manually.
