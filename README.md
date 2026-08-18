@@ -9,8 +9,8 @@ StagPlot is a suite of Python scripts designed for post-processing and visualizi
 | Script | Description |
 | :--- | :--- |
 | `info.py` | Quickly inspect StagYY simulation metadata. |
-| `field.py` | Plot a single 2D scalar field for a specific snapshot. |
-| `field_batch.py` | Generate 2D field frames over a range of snapshots and stitch them into a movie. |
+| `field.py` | Plot a single 2D scalar field for a specific snapshot (Currently only works for 2D simulations). |
+| `field_batch.py` | Generate 2D field frames over a range of snapshots and stitch them into a movie (Currently only works for 2D simulations). |
 | `rprof.py` | Plot 1D radial profiles (depth vs. value) for a specific snapshot. |
 | `rprof_time.py` | Create a spacetime plot (Hovmöller diagram) of a radial-profile parameter. |
 | `surf2D_time.py` | Create a spacetime plot (Hovmöller diagram) of surface parameters (only for 2D models). |
