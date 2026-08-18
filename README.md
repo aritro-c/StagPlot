@@ -54,6 +54,19 @@ del ..\main.zip
 
 ---
 
+## 💻 Visual Studio Code Setup
+
+If you use VS Code for development:
+1.  Open the `StagPlot-main` directory in VS Code.
+2.  Set the Python Interpreter:
+    *   Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on macOS).
+    *   Type **"Python: Select Interpreter"** and select it.
+    *   Choose the environment you created (e.g., `StagPlot`).
+
+**Linux Users:** It is **NOT recommended** to use the Flatpak or Snap version of VS Code. Their sandboxed nature often causes issues with finding system Python binaries or virtual environments. Use the system package manager instead (`apt` for Ubuntu/Debian and `dnf` for Fedora/RHEL; Arch users can do it on their own :) )
+
+---
+
 ## 🛠️ Manual Installation
 
 If you prefer to set up the environment manually, follow these steps:
@@ -90,9 +103,9 @@ pip install stagpy cmcrameri numpy matplotlib rich
 
 ---
 
-## 🎬 FFmpeg Installation (Required for Movies)
+## 🎬 FFmpeg Installation (Optional)
 
-FFmpeg is required by `field_batch.py` and `movie.py` to stitch individual frames into a movie file.
+FFmpeg is used by `field_batch.py` and `movie.py` if you want to stitch individual frames into a movie file.
 
 *   **Linux (Ubuntu/Debian):** `sudo apt update && sudo apt install ffmpeg`
 *   **Linux (Fedora/RHEL):** `sudo dnf install ffmpeg`
@@ -100,18 +113,7 @@ FFmpeg is required by `field_batch.py` and `movie.py` to stitch individual frame
 *   **macOS:** `brew install ffmpeg`
 *   **Windows:** `winget install ffmpeg` (Note: You may need to restart your terminal after installation)
 
----
 
-## 💻 Visual Studio Code Setup
-
-If you use VS Code for development:
-1.  Open the `StagPlot-main` folder in VS Code.
-2.  Set the Python Interpreter:
-    *   Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on macOS).
-    *   Type **"Python: Select Interpreter"** and select it.
-    *   Choose the environment you created (e.g., `StagPlot`).
-
-**Linux Users:** It is **NOT recommended** to use the Flatpak or Snap version of VS Code. Their sandboxed nature often causes issues with finding system Python binaries or virtual environments. Use the system package manager instead (`apt` for Ubuntu/Debian and `dnf` for Fedora/RHEL; Arch users can do it on their own :) )
 
 ---
 
