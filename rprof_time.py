@@ -18,107 +18,39 @@ except ImportError:
 console = Console()
 
 
-# --- FULL LIST OF RPROF PARAMETERS ---
-# Use these strings in 'FIELDS_TO_PLOT' to change the data being visualized.
-ALL_RPROF_FIELDS = [
-    "r",            # Radial coordinate [m]
-    "Tmean",        # Temperature [K]
-    "Tmin",         # Min temperature [K]
-    "Tmax",         # Max temperature [K]
-    "vrms",         # rms velocity [m/s]
-    "vmin",         # Min velocity [m/s]
-    "vmax",         # Max velocity [m/s]
-    "vzabs",        # Radial velocity [m/s]
-    "vzmin",        # Min radial velocity [m/s]
-    "vzmax",        # Max radial velocity [m/s]
-    "vhrms",        # Horizontal velocity [m/s]
-    "vhmin",        # Min horiz velocity [m/s]
-    "vhmax",        # Max horiz velocity [m/s]
-    "etalog",       # Viscosity [Pa.s]
-    "etamin",       # Min viscosity [Pa.s]
-    "etamax",       # Max viscosity [Pa.s]
-    "elog",         # Strain rate [1/s]
-    "emin",         # Min strain rate [1/s]
-    "emax",         # Max strain rate [1/s]
-    "slog",         # Stress [Pa]
-    "smin",         # Min stress [Pa]
-    "smax",         # Max stress [Pa]
-    "whrms",        # Horizontal vorticity [1/s]
-    "whmin",        # Min horiz vorticity [1/s]
-    "whmax",        # Max horiz vorticity [1/s]
-    "wzrms",        # Radial vorticity [1/s]
-    "wzmin",        # Min radial vorticity [1/s]
-    "wzmax",        # Max radial vorticity [1/s]
-    "drms",         # Divergence [1/s]
-    "dmin",         # Min divergence [1/s]
-    "dmax",         # Max divergence [1/s]
-    "enadv",        # Advection [W/m2]
-    "endiff",       # Diffusion [W/m2]
-    "enradh",       # Radiogenic heating [W/m2]
-    "enviscdiss",   # Viscous dissipation [W/m2]
-    "enadiabh",     # Adiabatic heating [W/m2]
-    "bsmean",       # Basalt content [1]
-    "bsmin",        # Min basalt content [1]
-    "bsmax",        # Max basalt content [1]
-    "rhomean",      # Density [kg/m3]
-    "rhomin",       # Min density [kg/m3]
-    "rhomax",       # Max density [kg/m3]
-    "airmean",      # Air [1]
-    "airmin",       # Min air [1]
-    "airmax",       # Max air [1]
-    "primmean",     # Primordial [1]
-    "primmin",      # Min primordial [1]
-    "primmax",      # Max primordial [1]
-    "ccmean",       # Continental crust [1]
-    "ccmin",        # Min continental crust [1]
-    "ccmax",        # Max continental crust [1]
-    "fmeltmean",    # Melt fraction [1]
-    "fmeltmin",     # Min melt fraction [1]
-    "fmeltmax",     # Max melt fraction [1]
-    "metalmean",    # Metal [1]
-    "metalmin",     # Min metal [1]
-    "metalmax",     # Max metal [1]
-    "gsmean",       # Grain size [m]
-    "gsmin",        # Min grain size [m]
-    "gsmax",        # Max grain [m]
-    "viscdisslog",  # Viscous dissipation [W/m2]
-    "viscdissmin",  # Min visc dissipation [W/m2]
-    "viscdissmax",  # Max visc dissipation [W/m2]
-    "advtot",       # Advection [W/m2]
-    "advdesc",      # Downward advection [W/m2]
-    "advasc",       # Upward advection [W/m2]
-    "tcondmean",    # Conductivity [W/(m.K)]
-    "tcondmin",     # Min conductivity [W/(m.K)]
-    "tcondmax",     # Max conductivity [W/(m.K)]
-    "impmean",      # Impactor fraction [1]
-    "impmin",       # Min impactor fraction [1]
-    "impmax",       # Max impactor fraction [1]
-    "hzmean",       # Harzburgite fraction [1]
-    "hzmin",        # Min harzburgite fraction [1]
-    "hzmax",        # Max harzburgite fraction [1]
-    "TTGmean",      # TTG fraction [1]
-    "TTGmin",       # Min TTG fraction [1]
-    "TTGmax",       # Max TTG fraction [1]
-    "edismean",     # Dislocation creep fraction [1]
-    "edismin",      # Min dislocation creep fraction [1]
-    "edismax",      # Max dislocation creep fraction [1]
-    "egbsmean",     # Grain boundary sliding fraction [1]
-    "egbsmin",      # Min grain boundary sliding fraction [1]
-    "egbsmax",      # Max grain boundary sliding fraction [1]
-    "ePeimean",     # Peierls creep fraction [1]
-    "ePeimin",      # Min Peierls creep fraction [1]
-    "ePeimax",      # Max Peierls creep fraction [1]
-    "eplamean",     # Plasticity fraction [1]
-    "eplamin",      # Min plasticity fraction [1]
-    "eplamax",      # Max plasticity fraction [1]
-    "dr",           # Cell thicknesses [m]
-    "diff",         # Diffusion flux [W/m2]
-    "diffs",        # Scaled diffusion flux [W/m2]
-    "advts",        # Scaled advection flux [W/m2]
-    "advds",        # Scaled downward advection flux [W/m2]
-    "advas",        # Scaled upward advection flux [W/m2]
-    "energy",       # Total heat flux [W/m2]
-]
+"""
+--- REFERENCE: ALL AVAILABLE RPROF FIELDS ---
+BASIC PHYSICS & DYNAMICS:
+    r: Radial coordinate            vrms/vmin/vmax: Velocity
+    vzabs/vzmin/vzmax: Radial vel   vhrms/vhmin/vhmax: Horiz velocity
+    whrms/whmin/whmax: Horiz vort   wzrms/wzmin/wzmax: Radial vorticity
+    drms/dmin/dmax: Divergence      dr: Cell thicknesses
+
+THERMAL STATE:
+    Tmean/Tmin/Tmax: Temperature    tcondmean/min/max: Conductivity
+    
+RHEOLOGY & STRESS:
+    etalog/etamin/etamax: Viscosity elog/emin/emax: Strain rate
+    slog/smin/smax: Stress          edismean/min/max: Disloc creep frac
+    egbsmean/min/max: GBS frac      ePeimean/min/max: Peierls creep frac
+    eplamean/min/max: Plasticity
+
+HEAT FLUX & ENERGY:
+    energy: Total heat flux         enadv: Advection
+    endiff: Diffusion               enradh: Radiogenic heating
+    enviscdiss: Visc dissipation    enadiabh: Adiabatic heating
+    viscdisslog/min/max: Visc diss  advtot: Total advection flux
+    advdesc: Downward advection     advasc: Upward advection
+    diff/diffs: Diffusion flux      advts/advds/advas: Scaled adv fluxes
+
+COMPOSITION, MELT, & MINERALOGY:
+    rhomean/rhomin/rhomax: Density  fmeltmean/min/max: Melt fraction
+    bsmean/bsmin/bsmax: Basalt      hzmean/hzmin/hzmax: Harzburgite
+    primmean/min/max: Primordial    airmean/min/max: Air fraction
+    ccmean/min/max: Cont crust      metalmean/min/max: Metal
+    impmean/min/max: Impactor       TTGmean/min/max: TTG fraction
+    gsmean/gsmin/gsmax: Grain size
+"""
 
 
 
