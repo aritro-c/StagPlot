@@ -13,8 +13,10 @@ try:
 except ImportError:
     HAS_CRAMERI = False
 
+
+
 # =============================================================================
-# CONFIGURATION
+#                                 USER INPUT
 # =============================================================================
 # Path to the directory containing StagYY archive files
 directory = Path('/home/aritro/Documents/Academia/#PhD/StagYY/archive_runs/hdf/archive/hdf/')
@@ -64,8 +66,11 @@ MP_VELOCITY  = "plasma"
 MP_CRUST     = "inferno"
 
 # =============================================================================
-# HELPERS
+#                         USER EDITS NOTHING BELOW
 # =============================================================================
+
+
+
 
 def get_cmap(crameri_name, mpl_name):
     """Helper to select colormap based on user preference and availability."""
