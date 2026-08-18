@@ -6,13 +6,14 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-"""
-info.py: A simplified utility to inspect StagYY simulation snapshot and time ranges.
-Optimized for speed by only reading the first and last available snapshots.
-"""
 
-# --- CONFIGURATION ---
+# ============================== USER INPUT ==================================
+
 DATA_DIRECTORY = "/home/aritro/Documents/Academia/#PhD/StagYY/archive_runs/hdf/archive/hdf/" # Put your directory path here
+
+# ======================= USER EDITS NOTHING BELOW ===========================
+
+
 
 SEC_PER_MYR = 1e6 * 365.25 * 24 * 3600
 SEC_PER_GYR = 1e3 * SEC_PER_MYR
