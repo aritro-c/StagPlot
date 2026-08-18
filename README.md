@@ -65,7 +65,7 @@ pip install stagpy cmcrameri numpy matplotlib rich
 
 ## 🎬 FFmpeg Installation (Required for Movies)
 
-FFmpeg is required by `field_batch.py` to stitch individual frames into a movie file.
+FFmpeg is required by `field_batch.py` and `movie.py` to stitch individual frames into a movie file.
 
 *   **Linux (Ubuntu/Debian):** `sudo apt update && sudo apt install ffmpeg`
 *   **Linux (Fedora/RHEL):** `sudo dnf install ffmpeg`
@@ -100,6 +100,7 @@ If you use VS Code for development:
 | `surf2D_time.py` | Create a spacetime plot (Hovmöller diagram) of surface parameters. |
 | `time.py` | Plot the evolution of global diagnostic parameters over time. |
 | `tseries_export.py`| Extract multiple time-series fields and export them to a structured text file. |
+| `movie.py` | A cross-platform utility to stitch a directory of PNG frames into an MP4 movie. |
 
 ---
 
