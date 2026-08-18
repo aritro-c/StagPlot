@@ -54,15 +54,16 @@ COMPOSITION, MELT, & MINERALOGY:
 
 
 
-# --- USER CONFIGURATION ---
-# Define the path to your StagYY 'archive' directory.
+# ============================= USER INPUT ===================================
+
+# Define the path to your StagYY simulation directory.
 DATA_ROOT = Path("/run/media/aritro/f522493b-003a-404d-a839-3e0925c674b6/Aritro/StagYY/archive_runs/euler/venus_i_01/archive/")
 
-# Fields to visualize ["Tmean", "fmeltmax", "elog"], (Y-axis = Depth, X-axis = Time, Color = Field Value)
-FIELDS_TO_PLOT = ["vrms"]   
+# FIELD (Y-axis = Depth, X-axis = Time, Color = Field Value)
+FIELDS_TO_PLOT = ["vrms"]   # ["Tmean", "fmeltmax", "elog"]
 
-# Time Range in Myr (e.g., (0, 1000) or None for all)
-TIME_RANGE = (0, 400)
+# Time Range in Myr 
+TIME_RANGE = (0, 400) # e.g., (0, 1000) or None for all
 
 # --- EXPORT SETTINGS ---
 EXPORT_SVG = False  # Set to True to also save as .svg
@@ -89,6 +90,12 @@ SAMPLE_STEP = 5
 USE_CRAMERI = True
 SEQUENTIAL_MAP = "vik"   # Good for T, viscosity, composition
 DIVERGING_MAP  = "vik"  # Good for velocity, divergence, flux
+
+
+# ======================== USER EDITS NOTHING BELOW =============================
+
+
+
 
 def run_visualizer():
     # --- 1. INITIALIZATION ---
