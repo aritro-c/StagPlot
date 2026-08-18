@@ -17,12 +17,13 @@ python3 install.py
 rm ../main.zip
 ```
 
-### Windows
-```powershell
-Invoke-WebRequest -Uri "https://github.com/aritro-c/StagPlot/archive/refs/heads/main.zip" -OutFile "main.zip"
-Expand-Archive -Path "main.zip" -Force
+### Windows (CMD & PowerShell)
+```cmd
+curl.exe -LO "https://github.com/aritro-c/StagPlot/archive/refs/heads/main.zip"
+tar.exe -xf main.zip
 cd StagPlot-main
 python install.py
+del ..\main.zip
 ```
 
 ---
