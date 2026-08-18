@@ -97,7 +97,7 @@ def main():
     
     # 4. Install dependencies
     stagpy_dep = "git+https://github.com/StagPython/StagPy.git" if is_dev else "stagpy"
-    dependencies = [stagpy_dep, "cmcrameri", "numpy", "matplotlib"]
+    dependencies = [stagpy_dep, "cmcrameri", "numpy", "matplotlib", "rich"]
     run_command([pip_path, "install"] + dependencies, f"Installing dependencies: {', '.join(dependencies)}")
     
     # 5. Check for FFmpeg
