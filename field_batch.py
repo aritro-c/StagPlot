@@ -45,7 +45,7 @@ field_to_plot = "T"
 # Range Selection
 range_mode = "snapshot"  # Options: "snapshot" or "time"
 snap_min = 0         # Used if range_mode is "snapshot"
-snap_max = 200         # Used if range_mode is "snapshot"
+snap_max = 300         # Used if range_mode is "snapshot"
 time_min_Myr = 70        # Used if range_mode is "time"
 time_max_Myr = 107     # Used if range_mode is "time"
 
@@ -298,19 +298,47 @@ if MAKE_MOVIE:
             quality_args = ["-crf", "25", "-preset", "medium"]
             scale_filter = f"scale={int(base_width * 0.8)}:{int(base_height * 0.8)}"
 
-        cmd = [
-            "ffmpeg", "-y",
-            "-framerate", str(effective_fps),
-            "-pattern_type", "glob",
-            "-i", str(output_dir / "frame_*.png"),
-            "-c:v", "libx264",
-            "-pix_fmt", "yuv420p",
-            "-vf", f"{scale_filter},pad=ceil(iw/2)*2:ceil(ih/2)*2"
-        ] + quality_args + [movie_name]
+        import platform
+        is_windows = platform.system() == "Windows"
+
+        if is_windows:
+            cmd = [
+                "ffmpeg", "-y",
+                "-framerate", str(effective_fps),
+                "-f", "image2pipe",
+                "-i", "-",
+                "-c:v", "libx264",
+                "-pix_fmt", "yuv420p",
+                "-vf", f"{scale_filter},pad=ceil(iw/2)*2:ceil(ih/2)*2"
+            ] + quality_args + [movie_name]
+        else:
+            cmd = [
+                "ffmpeg", "-y",
+                "-framerate", str(effective_fps),
+                "-pattern_type", "glob",
+                "-i", str(output_dir / "frame_*.png"),
+                "-c:v", "libx264",
+                "-pix_fmt", "yuv420p",
+                "-vf", f"{scale_filter},pad=ceil(iw/2)*2:ceil(ih/2)*2"
+            ] + quality_args + [movie_name]
         
         try:
             with console.status("[bold green]Running FFmpeg...", spinner="dots"):
-                result = subprocess.run(cmd, capture_output=True, text=True)
+                if is_windows:
+                    process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    for snap_num, _ in frames_to_render:
+                        frame_path = output_dir / f"frame_{snap_num:05d}.png"
+                        with open(frame_path, "rb") as f:
+                            process.stdin.write(f.read())
+                    out, err = process.communicate()
+                    
+                    class ResultDummy: pass
+                    result = ResultDummy()
+                    result.returncode = process.returncode
+                    result.stdout = out.decode('utf-8', errors='replace')
+                    result.stderr = err.decode('utf-8', errors='replace')
+                else:
+                    result = subprocess.run(cmd, capture_output=True, text=True)
             
             # Write log to file
             log_file = "ffmpeg_log.txt"
